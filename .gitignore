@@ -1,0 +1,42 @@
+_opam
+_build
+/_boot
+_perf
+*.install
+.merlin
+*.corrected
+
+# vim swap files
+*.swp
+*.swo
+
+# emacs lock and backup files
+.#*
+*~
+
+# vscode settings
+.vscode
+
+# git-ps hooks
+.git-ps
+
+.duneboot.*
+/boot/*.cm*
+dune.exe
+Makefile.dev
+result
+
+.DS_Store
+
+#generated dune files
+bin/dune
+lib/lp/clp/dune
+lib/lp/gurobi/dune
+
+tests/**/*.mlb
+tests/**/*.ast
+tests/**/*.core-ml
+tests/**/*.xml
+tests/**/*.sxml
+tests/**/*.raml
+tests/**/*.tml
