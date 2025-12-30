@@ -15,11 +15,11 @@
 
 (license BSD-3-Clause)
 
-(package
- (name systemp)
- (synopsis "System P")
- (description
-  "An implementation of a probabilistic programming language that extends Goedel's System T.")
- (depends ocaml dune core)
- (tags
-  ("System T" "probabiliistc programming" "programming language")))
+;; (package
+;;  (name systemp)
+;;  (synopsis "System P")
+;;  (description
+;;   "An implementation of a probabilistic programming language that extends Goedel's System T.")
+;;  (depends ocaml dune core)
+;;  (tags
+;;   ("System T" "probabiliistc programming" "programming language")))
