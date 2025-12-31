@@ -4,18 +4,8 @@ type t_base = Bint | Bfloat | Bstring [@@deriving compare, sexp]
 
 module Var = Var.Typ_var
 
-type t =
-  | BASE of t_base
-  | ARR of t * t
-  | SUM of t Label.Map.t
-  | PROD of t Label.Map.t
-[@@deriving sexp, compare]
-
-type view =
-  | Tbase of t_base
-  | Tarr of t * t
-  | Tsum of t Label.Map.t
-  | Tprod of t Label.Map.t
+type t = BASE of t_base | ARR of t * t | SUM of t Label.Map.t | PROD of t Label.Map.t [@@deriving sexp, compare]
+type view = Tbase of t_base | Tarr of t * t | Tsum of t Label.Map.t | Tprod of t Label.Map.t
 
 let into = function
   | Tbase b -> BASE b
@@ -30,7 +20,6 @@ let out = function
   | PROD ts -> Tprod ts
 
 let subst _ _ t2 = t2
-
 let frees _ = Var.Set.empty
 
 let rec to_string : t -> string =
@@ -48,12 +37,13 @@ let rec to_string : t -> string =
       Printf.sprintf "(%s)" (String.concat ~sep:" * " (List.map (Map.to_alist lmaptyp) ~f:factor))
 
 let base bt = into @@ Tbase bt
-let arr argty resty = into @@ Tarr (argty,resty)
-let sum ts = into @@ Tsum ts 
+let arr argty resty = into @@ Tarr (argty, resty)
+let sum ts = into @@ Tsum ts
 let prod ts = into @@ Tprod ts
 
 let bool =
-  sum (Label.Map.of_alist_exn
+  sum
+    (Label.Map.of_alist_exn
        [ (Label.of_string "true", prod Label.Map.empty); (Label.of_string "false", prod Label.Map.empty) ])
 
 let unit = prod Label.Map.empty
