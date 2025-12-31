@@ -39,8 +39,8 @@ let rec syn_t (gamma : context) e =
         | Typ.Tarr { argt; rest } -> (argt, rest)
         | t -> raise (E (Xnot_an_arrow (Typ.into t)))
       in
-      let t_res = syn_t gamma arg in
-      if Typ.(t_res = rest) then rest else raise (E (Xtype_mismatch { expected = t_res; found = rest }))
+      let t_arg = syn_t gamma arg in
+      if Typ.(t_arg = argt) then rest else raise (E (Xtype_mismatch { expected = argt; found = t_arg }))
 (* | Eprimapp of { prim : Prim.t; args : t list } *)
 (* | Einj of { con : Label.t; typ : Typ.t Label.Map.t; arg : t } *)
 (* | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t } *)
