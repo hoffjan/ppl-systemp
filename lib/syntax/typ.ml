@@ -4,18 +4,20 @@ type t_base = Bint | Bfloat | Bstring [@@deriving compare, sexp]
 
 module Var = Var.Typ_var
 
-type t = BASE of t_base | ARR of t * t | SUM of t Label.Map.t | PROD of t Label.Map.t [@@deriving sexp, compare]
-type view = Tbase of t_base | Tarr of t * t | Tsum of t Label.Map.t | Tprod of t Label.Map.t
+type t = BASE of t_base | ARR of { argt : t; rest : t } | SUM of t Label.Map.t | PROD of t Label.Map.t
+[@@deriving sexp, compare]
+
+type view = Tbase of t_base | Tarr of { argt : t; rest : t } | Tsum of t Label.Map.t | Tprod of t Label.Map.t
 
 let into = function
   | Tbase b -> BASE b
-  | Tarr (argty, resty) -> ARR (argty, resty)
+  | Tarr { argt; rest } -> ARR { argt; rest }
   | Tsum ts -> SUM ts
   | Tprod ts -> PROD ts
 
 let out = function
   | BASE b -> Tbase b
-  | ARR (argty, resty) -> Tarr (argty, resty)
+  | ARR { argt; rest } -> Tarr { argt; rest }
   | SUM ts -> Tsum ts
   | PROD ts -> Tprod ts
 
@@ -28,7 +30,7 @@ let rec to_string : t -> string =
   | Tbase Bint -> "int"
   | Tbase Bfloat -> "float"
   | Tbase Bstring -> "string"
-  | Tarr (argty, resty) -> Printf.sprintf "(%s -> %s)" (to_string argty) (to_string resty)
+  | Tarr { argt; rest } -> Printf.sprintf "(%s -> %s)" (to_string argt) (to_string rest)
   | Tsum ts ->
       let summand (l, ty) = Printf.sprintf "`%s of %s" (Label.to_string l) (to_string ty) in
       Printf.sprintf "[%s]" (String.concat ~sep:" | " (List.map (Map.to_alist ts) ~f:summand))
@@ -37,7 +39,7 @@ let rec to_string : t -> string =
       Printf.sprintf "(%s)" (String.concat ~sep:" * " (List.map (Map.to_alist lmaptyp) ~f:factor))
 
 let base bt = into @@ Tbase bt
-let arr argty resty = into @@ Tarr (argty, resty)
+let arr ~argt ~rest = into @@ Tarr { argt; rest }
 let sum ts = into @@ Tsum ts
 let prod ts = into @@ Tprod ts
 

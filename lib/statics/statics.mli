@@ -1,20 +1,14 @@
-(* open Core *)
+open Core
+open Syntax
 
-(* module StaticsError : sig *)
-(*   type t = *)
-(*     | TypVar of Var.Typ_var.t *)
-(*     | ExpVar of Var.Exp_var.t *)
-(*     | Type of string * unit Typ.t *)
-(*     | MissingLabel of string * Label.t *)
-(*     | Elim of string * Var.Exp_var.t * unit Typ.t *)
-(*     | Prim of Prim.t * unit Typ.t *)
+module Statics_error : sig
+  type t
 
-(*   include Sexpable.S with type t := t *)
+  include Sexpable.S with type t := t
 
-(*   val to_string : t -> string *)
-(* end *)
+  exception E of t
 
-(* exception TypeError of StaticsError.t *)
+  val to_string : t -> string
+end
 
-(* val validateType : unit Typ.t -> unit *)
-(* val check : Raml.t -> unit *)
+val type_exp : Exp.t -> Typ.t

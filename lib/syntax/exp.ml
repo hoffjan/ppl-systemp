@@ -7,10 +7,10 @@ type const = Cint of int | Cfloat of float | Cstring of string
 type t =
   | VAR of var
   | CONST of const
-  | LAM of { argv : string; body : t }
+  | LAM of { argv : string; argt : Typ.t; body : t }
   | APP of { func : t; arg : t }
   | PRIMAPP of { prim : Prim.t; args : t list }
-  | INJ of { con : Label.t; arg : t }
+  | INJ of { con : Label.t; typ : Typ.t Label.Map.t; arg : t }
   | CASE of { arg : t; cases : (string * t) Label.Map.t }
   | PROD of t Label.Map.t
   | PROJ of { comp : Label.t; arg : t }
@@ -18,10 +18,10 @@ type t =
 type view =
   | Evar of Var.t
   | Econst of const
-  | Elam of { argv : Var.t; body : t }
+  | Elam of { argv : Var.t; argt : Typ.t; body : t }
   | Eapp of { func : t; arg : t }
   | Eprimapp of { prim : Prim.t; args : t list }
-  | Einj of { con : Label.t; arg : t }
+  | Einj of { con : Label.t; typ : Typ.t Label.Map.t; arg : t }
   | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t }
   | Eprod of t Label.Map.t
   | Eproj of { comp : Label.t; arg : t }
@@ -32,10 +32,10 @@ let rec abs fx i z =
   function
   | VAR x -> VAR (fx i z x)
   | CONST b -> CONST b
-  | LAM { argv; body } -> LAM { argv; body = abs fx (i + 1) z body }
+  | LAM { argv; argt; body } -> LAM { argv; argt; body = abs fx (i + 1) z body }
   | APP { func; arg } -> APP { func = abs fx i z func; arg = abs fx i z arg }
   | PRIMAPP { prim; args } -> PRIMAPP { prim; args = List.map args ~f:(abs fx i z) }
-  | INJ { con; arg } -> INJ { con; arg = abs fx i z arg }
+  | INJ { con; typ; arg } -> INJ { con; typ; arg = abs fx i z arg }
   | CASE { arg; cases } -> CASE { arg = abs fx i z arg; cases = Map.map cases ~f:abs1 }
   | PROD vs -> PROD (Map.map vs ~f:(abs fx i z))
   | PROJ { comp; arg } -> PROJ { comp; arg = abs fx i z arg }
@@ -48,10 +48,10 @@ let into =
   function
   | Evar x -> VAR (FVAR x)
   | Econst b -> CONST b
-  | Elam { argv; body } -> LAM { argv = Var.to_user_string argv; body = bind 0 argv body }
+  | Elam { argv; argt; body } -> LAM { argv = Var.to_user_string argv; argt; body = bind 0 argv body }
   | Eapp { func; arg } -> APP { func; arg }
   | Eprimapp { prim; args } -> PRIMAPP { prim; args }
-  | Einj { con; arg } -> INJ { con; arg }
+  | Einj { con; typ; arg } -> INJ { con; typ; arg }
   | Ecase { arg; cases } -> CASE { arg; cases = Map.map cases ~f:into1 }
   | Eprod vs -> PROD vs
   | Eproj { comp; arg } -> PROJ { comp; arg }
@@ -65,12 +65,12 @@ let out =
   | VAR (FVAR x) -> Evar x
   | VAR (BVAR _) -> failwith "out_val: ABT invalid variable"
   | CONST b -> Econst b
-  | LAM { argv; body } ->
+  | LAM { argv; argt; body } ->
       let argv = Var.new_var argv in
-      Elam { argv; body = unbind 0 argv body }
+      Elam { argv; argt; body = unbind 0 argv body }
   | APP { func; arg } -> Eapp { func; arg }
   | PRIMAPP { prim; args } -> Eprimapp { prim; args }
-  | INJ { con; arg } -> Einj { con; arg }
+  | INJ { con; typ; arg } -> Einj { con; typ; arg }
   | CASE { arg; cases } -> Ecase { arg; cases = Map.map cases ~f:out1 }
   | PROD vs -> Eprod vs
   | PROJ { comp; arg } -> Eproj { comp; arg }
@@ -91,10 +91,10 @@ let rec frees =
 
 let var x = into (evar x)
 let const b = into (econst b)
-let lam ~argv ~body = into (elam ~argv ~body)
+let lam ~argv ~argt ~body = into (elam ~argv ~argt ~body)
 let app ~func ~arg = into (eapp ~func ~arg)
 let primapp ~prim ~args = into (eprimapp ~prim ~args)
-let inj ~con ~arg = into (einj ~con ~arg)
+let inj ~con ~typ ~arg = into (einj ~con ~typ ~arg)
 let case ~arg ~cases = into (ecase ~arg ~cases)
 let prod vs = into (eprod vs)
 let proj ~comp ~arg = into (eproj ~comp ~arg)
