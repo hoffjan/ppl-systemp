@@ -11,7 +11,7 @@ type t =
   | APP of { func : t; arg : t }
   | PRIMAPP of { prim : Prim.t; args : t list }
   | INJ of { con : Label.t; typ : Typ.t Label.Map.t; arg : t }
-  | CASE of { arg : t; cases : (string * t) Label.Map.t }
+  | CASE of { arg : t; cases : (string * t) Label.Map.t; typ : Typ.t }
   | PROD of t Label.Map.t
   | PROJ of { comp : Label.t; arg : t }
 
@@ -22,7 +22,7 @@ type view =
   | Eapp of { func : t; arg : t }
   | Eprimapp of { prim : Prim.t; args : t list }
   | Einj of { con : Label.t; typ : Typ.t Label.Map.t; arg : t }
-  | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t }
+  | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t; typ : Typ.t }
   | Eprod of t Label.Map.t
   | Eproj of { comp : Label.t; arg : t }
 [@@deriving variants]
@@ -36,7 +36,7 @@ let rec abs fx i z =
   | APP { func; arg } -> APP { func = abs fx i z func; arg = abs fx i z arg }
   | PRIMAPP { prim; args } -> PRIMAPP { prim; args = List.map args ~f:(abs fx i z) }
   | INJ { con; typ; arg } -> INJ { con; typ; arg = abs fx i z arg }
-  | CASE { arg; cases } -> CASE { arg = abs fx i z arg; cases = Map.map cases ~f:abs1 }
+  | CASE { arg; cases; typ } -> CASE { arg = abs fx i z arg; cases = Map.map cases ~f:abs1; typ }
   | PROD vs -> PROD (Map.map vs ~f:(abs fx i z))
   | PROJ { comp; arg } -> PROJ { comp; arg = abs fx i z arg }
 
@@ -52,7 +52,7 @@ let into =
   | Eapp { func; arg } -> APP { func; arg }
   | Eprimapp { prim; args } -> PRIMAPP { prim; args }
   | Einj { con; typ; arg } -> INJ { con; typ; arg }
-  | Ecase { arg; cases } -> CASE { arg; cases = Map.map cases ~f:into1 }
+  | Ecase { arg; cases; typ } -> CASE { arg; cases = Map.map cases ~f:into1; typ }
   | Eprod vs -> PROD vs
   | Eproj { comp; arg } -> PROJ { comp; arg }
 
@@ -71,7 +71,7 @@ let out =
   | APP { func; arg } -> Eapp { func; arg }
   | PRIMAPP { prim; args } -> Eprimapp { prim; args }
   | INJ { con; typ; arg } -> Einj { con; typ; arg }
-  | CASE { arg; cases } -> Ecase { arg; cases = Map.map cases ~f:out1 }
+  | CASE { arg; cases; typ } -> Ecase { arg; cases = Map.map cases ~f:out1; typ }
   | PROD vs -> Eprod vs
   | PROJ { comp; arg } -> Eproj { comp; arg }
 
@@ -84,7 +84,7 @@ let rec frees =
   | APP { func; arg } -> Var.Set.union_list [ frees func; frees arg ]
   | PRIMAPP { args; _ } -> Var.Set.union_list (List.map args ~f:frees)
   | INJ { arg; _ } | PROJ { arg; _ } -> frees arg
-  | CASE { arg; cases } ->
+  | CASE { arg; cases; _ } ->
       let _, cases_frees = List.unzip (Map.to_alist (Map.map cases ~f:frees1)) in
       Var.Set.union_list (frees arg :: cases_frees)
   | PROD vs -> Var.Set.union_list (List.map (Map.to_alist vs) ~f:frees1)
@@ -95,7 +95,7 @@ let lam ~argv ~argt ~body = into (elam ~argv ~argt ~body)
 let app ~func ~arg = into (eapp ~func ~arg)
 let primapp ~prim ~args = into (eprimapp ~prim ~args)
 let inj ~con ~typ ~arg = into (einj ~con ~typ ~arg)
-let case ~arg ~cases = into (ecase ~arg ~cases)
+let case ~arg ~cases ~typ = into (ecase ~arg ~cases ~typ)
 let prod vs = into (eprod vs)
 let proj ~comp ~arg = into (eproj ~comp ~arg)
 let to_string _ = ""

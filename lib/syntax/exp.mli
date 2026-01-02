@@ -10,7 +10,7 @@ type view =
   | Eapp of { func : t; arg : t }
   | Eprimapp of { prim : Prim.t; args : t list }
   | Einj of { con : Label.t; typ : Typ.t Label.Map.t; arg : t }
-  | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t }
+  | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t; typ : Typ.t }
   | Eprod of t Label.Map.t
   | Eproj of { comp : Label.t; arg : t }
 
@@ -26,7 +26,7 @@ val lam : argv:Var.t -> argt:Typ.t -> body:t -> t
 val app : func:t -> arg:t -> t
 val primapp : prim:Prim.t -> args:t list -> t
 val inj : con:Label.t -> typ:Typ.t Label.Map.t -> arg:t -> t
-val case : arg:t -> cases:(Var.t * t) Label.Map.t -> t
+val case : arg:t -> cases:(Var.t * t) Label.Map.t -> typ:Typ.t -> t
 val prod : t Label.Map.t -> t
 val proj : comp:Label.t -> arg:t -> t
 

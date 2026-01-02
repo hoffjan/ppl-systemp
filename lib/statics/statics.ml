@@ -93,7 +93,7 @@ let rec syn_t gamma e =
         | None -> raise (E (Xlabel_missing { label = con; typ = Typ.sum typ }))
       in
       Typ.sum typ
-  | Ecase { arg; cases } ->
+  | Ecase { arg; cases; typ } ->
       let arg_typ = syn_t gamma arg in
       begin
         match Typ.out arg_typ with
@@ -102,14 +102,13 @@ let rec syn_t gamma e =
               let f ~key ~data =
                 match Map.find cases key with
                 | Some (x, e) ->
-                    if Typ.(failwith "fixme" <> syn_t (bind [ (x, data) ]) e) then
-                      failwith "(E (Xtype_mismatch {expected})"
-                    else ()
+                    let t = syn_t (bind [ (x, data) ]) e in
+                    if Typ.(typ <> t) then raise (E (Xtype_mismatch { expected = typ; found = t })) else ()
                 | None -> raise (E (Xcase_missing { lable = key; typ = arg_typ }))
               in
               Map.iteri lmap ~f
             in
-            failwith "fixme"
+            typ
         | _ -> raise (E (Xnot_sum arg_typ))
       end
   | Eprod comps -> Typ.prod @@ Map.map comps ~f:(syn_t gamma)
