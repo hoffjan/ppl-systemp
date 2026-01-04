@@ -10,9 +10,6 @@ module Dynamics_error = struct
     | Xprim of Prim.t * value list
     | Xmalformed of Exp.t
     | Xmissing_label of Exp.t * Label.t
-  (* | Xelim of string * value *)
-  (* | Xtype of string * Typ.t *)
-  (* | Xmain_fun of string *)
 
   exception E of t
 
