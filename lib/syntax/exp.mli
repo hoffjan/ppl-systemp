@@ -13,6 +13,10 @@ type view =
   | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t; typ : Typ.t }
   | Eprod of t Label.Map.t
   | Eproj of { comp : Label.t; arg : t }
+  | Elet of { e1 : t; x : Var.t; e2 : t }
+  | Enil of Typ.t
+  | Econs of { head : t; tail : t }
+  | Elrec of { arg : t; base : t; headv : Var.t; recv : Var.t; step : t }
 
 (* basics *)
 val into : view -> t
@@ -29,6 +33,10 @@ val inj : con:Label.t -> typ:Typ.t Label.Map.t -> arg:t -> t
 val case : arg:t -> cases:(Var.t * t) Label.Map.t -> typ:Typ.t -> t
 val prod : t Label.Map.t -> t
 val proj : comp:Label.t -> arg:t -> t
+val let' : e1:t -> x:Var.t -> e2:t -> t
+val nil : Typ.t -> t
+val cons : head:t -> tail:t -> t
+val lrec : arg:t -> base:t -> headv:Var.t -> recv:Var.t -> step:t -> t
 
 (* extras *)
 val to_string : t -> string

@@ -2,7 +2,12 @@ open Core
 open Syntax
 module Var = Var.Exp_var
 
-type value = Vconst of Exp.const | Vlam of (value -> value) | Vinj of Label.t * value | Vprod of value Label.Map.t
+type value =
+  | Vconst of Exp.const
+  | Vlam of (value -> value)
+  | Vinj of Label.t * value
+  | Vprod of value Label.Map.t
+  | Vlist of value List.t
 
 module Dynamics_error = struct
   type t =
@@ -80,5 +85,22 @@ let rec eval ctx exp =
         end
       | _ -> malformed exp
     end
+  | Elet { e1; x; e2 } ->
+      let v1 = eval ctx e1 in
+      eval (bind [ (x, v1) ]) e2
+  | Enil _ -> Vlist []
+  | Econs { head; tail } ->
+      let v_hd = eval ctx head in
+      let v_tl = match eval ctx tail with Vlist l -> l | _ -> malformed exp in
+      Vlist (v_hd :: v_tl)
+  | Elrec { arg; base; headv; recv; step } ->
+      let vs = match eval ctx arg with Vlist vs -> vs | _ -> malformed arg in
+      let rec eval_lrec = function
+        | [] -> eval ctx base
+        | v_head :: vs ->
+            let v_rec = eval_lrec vs in
+            eval (bind [ (headv, v_head); (recv, v_rec) ]) step
+      in
+      eval_lrec vs
 
 let eval = eval Var.Map.empty

@@ -14,6 +14,10 @@ type t =
   | CASE of { arg : t; cases : (string * t) Label.Map.t; typ : Typ.t }
   | PROD of t Label.Map.t
   | PROJ of { comp : Label.t; arg : t }
+  | LET of { e1 : t; x : string; e2 : t }
+  | NIL of Typ.t
+  | CONS of { head : t; tail : t }
+  | LREC of { arg : t; base : t; headv : string; recv : string; step : t }
 
 type view =
   | Evar of Var.t
@@ -25,6 +29,10 @@ type view =
   | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t; typ : Typ.t }
   | Eprod of t Label.Map.t
   | Eproj of { comp : Label.t; arg : t }
+  | Elet of { e1 : t; x : Var.t; e2 : t }
+  | Enil of Typ.t
+  | Econs of { head : t; tail : t }
+  | Elrec of { arg : t; base : t; headv : Var.t; recv : Var.t; step : t }
 [@@deriving variants]
 
 let rec abs fx i z =
@@ -39,6 +47,11 @@ let rec abs fx i z =
   | CASE { arg; cases; typ } -> CASE { arg = abs fx i z arg; cases = Map.map cases ~f:abs1; typ }
   | PROD vs -> PROD (Map.map vs ~f:(abs fx i z))
   | PROJ { comp; arg } -> PROJ { comp; arg = abs fx i z arg }
+  | LET { e1; x; e2 } -> LET { e1 = abs fx i z e1; x; e2 = abs fx (i + 1) z e2 }
+  | NIL t -> NIL t
+  | CONS { head; tail } -> CONS { head = abs fx i z head; tail = abs fx i z tail }
+  | LREC { arg; base; headv; recv; step } ->
+      LREC { arg = abs fx i z arg; base = abs fx i z base; headv; recv; step = abs fx (i + 2) z step }
 
 let bind = abs (fun i z -> function FVAR x -> if Var.(x = z) then BVAR i else FVAR x | y -> y)
 let unbind = abs (fun i z -> function BVAR j -> if i = j then FVAR z else BVAR j | y -> y)
@@ -55,6 +68,14 @@ let into =
   | Ecase { arg; cases; typ } -> CASE { arg; cases = Map.map cases ~f:into1; typ }
   | Eprod vs -> PROD vs
   | Eproj { comp; arg } -> PROJ { comp; arg }
+  | Elet { e1; x; e2 } -> LET { e1; x = Var.to_user_string x; e2 = bind 0 x e2 }
+  | Enil t -> NIL t
+  | Econs { head; tail } -> CONS { head; tail }
+  | Elrec { arg; base; headv; recv; step } ->
+      let step = bind 1 headv (bind 0 recv step) in
+      let headv = Var.to_user_string headv in
+      let recv = Var.to_user_string recv in
+      LREC { arg; base; headv; recv; step }
 
 let out =
   let out1 (v, e) =
@@ -74,6 +95,16 @@ let out =
   | CASE { arg; cases; typ } -> Ecase { arg; cases = Map.map cases ~f:out1; typ }
   | PROD vs -> Eprod vs
   | PROJ { comp; arg } -> Eproj { comp; arg }
+  | LET { e1; x; e2 } ->
+      let x = Var.new_var x in
+      Elet { e1; x; e2 = unbind 0 x e2 }
+  | NIL t -> Enil t
+  | CONS { head; tail } -> Econs { head; tail }
+  | LREC { arg; base; headv; recv; step } ->
+      let headv = Var.new_var headv in
+      let recv = Var.new_var recv in
+      let step = unbind 1 headv @@ unbind 0 recv step in
+      Elrec { arg; base; headv; recv; step }
 
 let rec frees =
   let frees1 (_, e) = frees e in
@@ -88,6 +119,10 @@ let rec frees =
       let _, cases_frees = List.unzip (Map.to_alist (Map.map cases ~f:frees1)) in
       Var.Set.union_list (frees arg :: cases_frees)
   | PROD vs -> Var.Set.union_list (List.map (Map.to_alist vs) ~f:frees1)
+  | LET { e1; e2; _ } -> Var.Set.union_list [ frees e1; frees e2 ]
+  | NIL _ -> Var.Set.empty
+  | CONS { head; tail } -> Var.Set.union_list [ frees head; frees tail ]
+  | LREC { arg; base; step; _ } -> Var.Set.union_list (List.map ~f:frees [ arg; base; step ])
 
 let var x = into (evar x)
 let const b = into (econst b)
@@ -98,4 +133,8 @@ let inj ~con ~typ ~arg = into (einj ~con ~typ ~arg)
 let case ~arg ~cases ~typ = into (ecase ~arg ~cases ~typ)
 let prod vs = into (eprod vs)
 let proj ~comp ~arg = into (eproj ~comp ~arg)
+let let' ~e1 ~x ~e2 = into (elet ~e1 ~x ~e2)
+let nil t = into (enil t)
+let cons ~head ~tail = into (econs ~head ~tail)
+let lrec ~arg ~base ~headv ~recv ~step = into (elrec ~arg ~base ~headv ~recv ~step)
 let to_string _ = ""
