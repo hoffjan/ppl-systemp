@@ -5,6 +5,7 @@ _perf
 *.install
 .merlin
 *.corrected
+/temp
 
 # vim swap files
 *.swp
@@ -27,16 +28,3 @@ Makefile.dev
 result
 
 .DS_Store
-
-#generated dune files
-bin/dune
-lib/lp/clp/dune
-lib/lp/gurobi/dune
-
-tests/**/*.mlb
-tests/**/*.ast
-tests/**/*.core-ml
-tests/**/*.xml
-tests/**/*.sxml
-tests/**/*.raml
-tests/**/*.tml
