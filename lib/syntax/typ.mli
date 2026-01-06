@@ -12,7 +12,12 @@ type t
 
 include Sexpable.S with type t := t
 
-type view = Tbase of t_base | Tarr of { argt : t; rest : t } | Tsum of t Label.Map.t | Tprod of t Label.Map.t
+type view =
+  | Tbase of t_base
+  | Tarr of { argt : t; rest : t }
+  | Tsum of t Label.Map.t
+  | Tprod of t Label.Map.t
+  | Tlist of t
 
 val into : view -> t
 val out : t -> view
@@ -26,6 +31,7 @@ val base : t_base -> t
 val arr : argt:t -> rest:t -> t
 val sum : t Label.Map.t -> t
 val prod : t Label.Map.t -> t
+val list : t -> t
 val bool : t
 val unit : t
 

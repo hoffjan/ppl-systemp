@@ -11,6 +11,7 @@ module Statics_error = struct
     | Xlabel_missing of { label : Label.t; typ : Typ.t }
     | Xnot_sum of Typ.t
     | Xnot_prod of Typ.t
+    | Xnot_list of Typ.t
     | Xcase_missing of { lable : Label.t; typ : Typ.t }
   [@@deriving sexp]
 
@@ -121,5 +122,27 @@ let rec syn_t gamma e =
           | None -> raise (E (Xlabel_missing { label = comp; typ = arg_typ }))
         end
       | _ -> raise (E (Xnot_prod arg_typ)))
+  | Elet { e1; x; e2 } ->
+      let t1 = syn_t gamma e1 in
+      syn_t (bind [ (x, t1) ]) e2
+  | Enil t -> Typ.list t
+  | Econs { head; tail } ->
+      let t_head = syn_t gamma head in
+      let t_tail = syn_t gamma tail in
+      begin
+        match Typ.out t_tail with
+        | Typ.Tlist t_elm when Typ.(t_elm = t_head) -> t_tail
+        | _ -> raise (E (Xtype_mismatch { expected = Typ.list t_head; found = t_tail }))
+      end
+  | Elrec { arg; base; headv; recv; step } ->
+      let t_arg = syn_t gamma arg in
+      begin
+        match Typ.out t_arg with
+        | Tlist t_elem ->
+            let t_base = syn_t gamma base in
+            let t_step = syn_t (bind [ (headv, t_elem); (recv, t_base) ]) step in
+            if Typ.(t_base = t_step) then t_base else raise (E (Xtype_mismatch { expected = t_base; found = t_step }))
+        | _ -> raise (E (Xnot_list t_arg))
+      end
 
 let type_exp e = syn_t Exp.Var.Map.empty e
