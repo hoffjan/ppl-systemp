@@ -8,7 +8,18 @@ let base s =
   let float = symbol "float" >> return Typ.Bfloat in
   (choice [ int; float; string ] >>= fun btype -> return (Typ.base btype)) s
 
-let rec typ s = (choice [ attempt arrow; list ]) s
+let rec typ s =
+  let parse =
+    let* argt = list in
+    let* arrow = option (symbol "->") in
+    match arrow with
+    | None -> return argt
+    | Some () ->
+        let* rest = typ in
+        return (Typ.arr ~argt ~rest)
+  in
+  parse s
+
 and atom s = (choice [ base; prod; sum; parens typ ]) s
 
 and decs l_sym r_sym label s =
@@ -32,15 +43,6 @@ and decs l_sym r_sym label s =
 
 and prod s = (decs "<" ">" prod_comp >>= fun lmap -> return (Typ.prod lmap)) s
 and sum s = (decs "[" "]" sum_const >>= fun lmap -> return (Typ.sum lmap)) s
-
-and arrow s =
-  let parse =
-    let* argt = list in
-    let* _ = symbol "->" in
-    let* rest = typ in
-    return (Typ.arr ~argt ~rest)
-  in
-  parse s
 
 and list s =
   let parse =
