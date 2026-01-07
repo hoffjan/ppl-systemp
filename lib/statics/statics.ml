@@ -65,12 +65,11 @@ let rec syn_t gamma e =
   | Evar x -> lookup x
   | Econst c ->
       Typ.base
-        begin
-          match c with Cint _ -> Typ.Bint | Cfloat _ -> Typ.Bfloat | Cstring _ -> Typ.Bstring
+        begin match c with Cint _ -> Typ.Bint | Cfloat _ -> Typ.Bfloat | Cstring _ -> Typ.Bstring
         end
   | Elam { argv; argt; body } ->
-      let t_res = syn_t (bind [ (argv, argt) ]) body in
-      t_res
+      let rest = syn_t (bind [ (argv, argt) ]) body in
+      Typ.lam ~argt ~rest
   | Eapp { func; arg } ->
       let argt, rest =
         match Typ.out @@ syn_t gamma func with
@@ -96,21 +95,20 @@ let rec syn_t gamma e =
       Typ.sum typ
   | Ecase { arg; cases; typ } ->
       let arg_typ = syn_t gamma arg in
-      begin
-        match Typ.out arg_typ with
-        | Typ.Tprod lmap ->
-            let () =
-              let f ~key ~data =
-                match Map.find cases key with
-                | Some (x, e) ->
-                    let t = syn_t (bind [ (x, data) ]) e in
-                    if Typ.(typ <> t) then raise (E (Xtype_mismatch { expected = typ; found = t })) else ()
-                | None -> raise (E (Xcase_missing { lable = key; typ = arg_typ }))
-              in
-              Map.iteri lmap ~f
+      begin match Typ.out arg_typ with
+      | Typ.Tprod lmap ->
+          let () =
+            let f ~key ~data =
+              match Map.find cases key with
+              | Some (x, e) ->
+                  let t = syn_t (bind [ (x, data) ]) e in
+                  if Typ.(typ <> t) then raise (E (Xtype_mismatch { expected = typ; found = t })) else ()
+              | None -> raise (E (Xcase_missing { lable = key; typ = arg_typ }))
             in
-            typ
-        | _ -> raise (E (Xnot_sum arg_typ))
+            Map.iteri lmap ~f
+          in
+          typ
+      | _ -> raise (E (Xnot_sum arg_typ))
       end
   | Eprod comps -> Typ.prod @@ Map.map comps ~f:(syn_t gamma)
   | Eproj { comp; arg } -> (
@@ -129,20 +127,18 @@ let rec syn_t gamma e =
   | Econs { head; tail } ->
       let t_head = syn_t gamma head in
       let t_tail = syn_t gamma tail in
-      begin
-        match Typ.out t_tail with
-        | Typ.Tlist t_elm when Typ.(t_elm = t_head) -> t_tail
-        | _ -> raise (E (Xtype_mismatch { expected = Typ.list t_head; found = t_tail }))
+      begin match Typ.out t_tail with
+      | Typ.Tlist t_elm when Typ.(t_elm = t_head) -> t_tail
+      | _ -> raise (E (Xtype_mismatch { expected = Typ.list t_head; found = t_tail }))
       end
   | Elrec { arg; base; headv; recv; step } ->
       let t_arg = syn_t gamma arg in
-      begin
-        match Typ.out t_arg with
-        | Tlist t_elem ->
-            let t_base = syn_t gamma base in
-            let t_step = syn_t (bind [ (headv, t_elem); (recv, t_base) ]) step in
-            if Typ.(t_base = t_step) then t_base else raise (E (Xtype_mismatch { expected = t_base; found = t_step }))
-        | _ -> raise (E (Xnot_list t_arg))
+      begin match Typ.out t_arg with
+      | Tlist t_elem ->
+          let t_base = syn_t gamma base in
+          let t_step = syn_t (bind [ (headv, t_elem); (recv, t_base) ]) step in
+          if Typ.(t_base = t_step) then t_base else raise (E (Xtype_mismatch { expected = t_base; found = t_step }))
+      | _ -> raise (E (Xnot_list t_arg))
       end
 
 let type_exp e = syn_t Exp.Var.Map.empty e
