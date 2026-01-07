@@ -1,8 +1,8 @@
 open Core
 module Var = Var.Exp_var
 
-type var = FVAR of Var.t | BVAR of int
-type const = Cint of int | Cfloat of float | Cstring of string
+type var = FVAR of Var.t | BVAR of int [@@deriving sexp]
+type const = Cint of int | Cfloat of float | Cstring of string [@@deriving sexp]
 
 type t =
   | VAR of var
@@ -18,6 +18,7 @@ type t =
   | NIL of Typ.t
   | CONS of { head : t; tail : t }
   | LREC of { arg : t; base : t; headv : string; recv : string; step : t }
+[@@deriving sexp]
 
 type view =
   | Evar of Var.t
@@ -137,4 +138,4 @@ let let' ~e1 ~x ~e2 = into (elet ~e1 ~x ~e2)
 let nil t = into (enil t)
 let cons ~head ~tail = into (econs ~head ~tail)
 let lrec ~arg ~base ~headv ~recv ~step = into (elrec ~arg ~base ~headv ~recv ~step)
-let to_string _ = ""
+let to_string e = Sexp.to_string_hum (sexp_of_t e)
