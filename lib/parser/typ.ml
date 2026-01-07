@@ -2,21 +2,19 @@ open MParser
 open Syntax
 open Utils
 
-(* --- Types --- *)
-
 let base s =
   let int = symbol "int" >> return Typ.Bint in
   let string = symbol "string" >> return Typ.Bstring in
   let float = symbol "float" >> return Typ.Bfloat in
   (choice [ int; float; string ] >>= fun btype -> return (Typ.base btype)) s
 
-let rec typ s = (choice [ attempt arrow; list; atom ]) s
+let rec typ s = (choice [ attempt arrow; list ]) s
 and atom s = (choice [ base; prod; sum; parens typ ]) s
 
-and decs l_sym r_sym s =
+and decs l_sym r_sym label s =
   let dec s =
     let parse =
-      let* name = ident in
+      let* name = label in
       let* _ = symbol ":" in
       let* t = typ in
       return (Label.of_string name, t)
@@ -32,12 +30,12 @@ and decs l_sym r_sym s =
   in
   parse s
 
-and prod s = (decs "<" ">" >>= fun lmap -> return (Typ.prod lmap)) s
-and sum s = (decs "[" "]" >>= fun lmap -> return (Typ.sum lmap)) s
+and prod s = (decs "<" ">" prod_comp >>= fun lmap -> return (Typ.prod lmap)) s
+and sum s = (decs "[" "]" sum_const >>= fun lmap -> return (Typ.sum lmap)) s
 
 and arrow s =
   let parse =
-    let* argt = atom in
+    let* argt = list in
     let* _ = symbol "->" in
     let* rest = typ in
     return (Typ.arr ~argt ~rest)
@@ -46,9 +44,8 @@ and arrow s =
 
 and list s =
   let parse =
-    let* _ = symbol "list" in
-    let* t_elem = parens typ in
-    return (Typ.list t_elem)
+    let* t = atom in
+    many_fold_left (fun t () -> Typ.list t) t (symbol "list")
   in
   parse s
 
