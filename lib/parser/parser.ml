@@ -10,3 +10,12 @@ let typ str =
   | Failed (msg, _) ->
       let () = print_string msg in
       raise Syntax_error
+
+(* --- Types --- *)
+let exp str =
+  (* parse_string takes: parser -> input -> user_state -> result *)
+  match parse_string (Exp.parse << eof) str String.Map.empty with
+  | Success t -> t
+  | Failed (msg, _) ->
+      let () = print_string msg in
+      raise Syntax_error
