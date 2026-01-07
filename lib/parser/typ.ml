@@ -36,8 +36,7 @@ and decs l_sym r_sym label s =
     let* _ = symbol l_sym in
     let* decs = sep_by dec (symbol ",") in
     let* _ = symbol r_sym in
-    let lmap = Label.Map.of_alist_exn decs in
-    return lmap
+    match Label.Map.of_alist decs with `Ok lmap -> return lmap | `Duplicate_key _ -> fail "Multiple labels in type."
   in
   parse s
 
