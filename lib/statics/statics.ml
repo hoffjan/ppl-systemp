@@ -17,7 +17,7 @@ module Statics_error = struct
 
   exception E of t
 
-  let to_string _ = failwith "implement me"
+  let to_string err = Sexp.to_string_hum (sexp_of_t err)
 end
 
 open Statics_error
@@ -69,7 +69,7 @@ let rec syn_t gamma e =
         end
   | Elam { argv; argt; body } ->
       let rest = syn_t (bind [ (argv, argt) ]) body in
-      Typ.lam ~argt ~rest
+      Typ.arr ~argt ~rest
   | Eapp { func; arg } ->
       let argt, rest =
         match Typ.out @@ syn_t gamma func with
@@ -141,4 +141,8 @@ let rec syn_t gamma e =
       | _ -> raise (E (Xnot_list t_arg))
       end
 
-let type_exp e = syn_t Exp.Var.Map.empty e
+let type_exp e =
+  try syn_t Exp.Var.Map.empty e
+  with E err ->
+    let _ = Printf.printf "Type error: %s" (to_string err) in
+    exit 1
