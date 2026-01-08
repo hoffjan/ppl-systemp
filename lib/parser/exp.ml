@@ -51,18 +51,51 @@ let with_bound_var str p =
 (*   let*      *)
 (*     in parser s *)
 
-let rec exp s = app s
+let rec exp s = atom_app_or_proj s
 
-and app s =
-  let parse =
-    let* e = atom in
+and atom_app_or_proj s =
+  let app e =
     let* es = many (attempt atom) in
     let f func arg = E.app ~func ~arg in
     return (List.fold ~init:e ~f es)
   in
+  let proj e =
+    let* _ = char '.' in
+    let* comp = prod_comp >>= fun str -> return (Label.of_string str) in
+    return (E.proj ~comp ~arg:e)
+  in
+  let parse =
+    let* e = atom in
+    let* next = look_ahead any_char <|> (eof >> return 'X') in
+    match next with
+    | '.' ->
+        print_string "not good\n";
+        proj e
+    | _ -> app e
+  in
   parse s
 
-and atom s = (choice [ lrec; let'; nil; cons; lam; var; parens exp ]) s
+and atom s = (choice [ prod; lrec; let'; nil; cons; lam; var; parens exp ]) s
+
+and prod s =
+  let comp s =
+    let parse =
+      let* name = prod_comp in
+      let* _ = symbol "=" in
+      let* e = exp in
+      return (Label.of_string name, e)
+    in
+    parse s
+  in
+  let parse =
+    let* () = symbol "<" in
+    let* comps = sep_by comp (symbol ",") in
+    let* () = symbol ">" in
+    match Label.Map.of_alist comps with
+    | `Ok lmap -> return (E.prod lmap)
+    | `Duplicate_key _ -> fail "Multiple components in product."
+  in
+  parse s
 
 and lrec s =
   let parse =
