@@ -1,1 +1,1 @@
-val parse : (Syntax.Typ.t, 'a) MParser.t
+val parse : (string -> Syntax.Typ.t) -> (Syntax.Typ.t, 'a) MParser.t

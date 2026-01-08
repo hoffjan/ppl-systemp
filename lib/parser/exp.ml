@@ -15,7 +15,6 @@ let var_ident s =
   in
   parser s
 
-let typ_ident s = (ident lowercase) s
 let sym_nil s = (symbol "Nil") s
 
 let sym_cons p =
@@ -32,6 +31,8 @@ type ('a, 'b) parse_state = {
   consts : (Label.t, T.t Label.Map.t, 'b) Base.Map.t;
   types : (string, T.t, 'a) Base.Map.t;
 }
+
+let typ s = (get_user_state >>= fun { types; _ } -> Typ.parse (Map.find_exn types)) s
 
 let var s =
   let parse =
@@ -55,7 +56,7 @@ let typ_dec s =
     let* () = symbol "type" in
     let* t_name = typ_ident in
     let* () = symbol "=" in
-    let* t = Typ.parse in
+    let* t = typ in
     let* ({ types; consts; _ } as state) = get_user_state in
     match Map.find types t_name with
     | Some _ -> fail ("Type " ^ t_name ^ " is already defined.")
@@ -105,7 +106,7 @@ and case s =
   in
   let parse =
     let* () = symbol "case" in
-    let* typ = option (between (symbol "[") (symbol "]") Typ.parse) in
+    let* typ = option (between (symbol "[") (symbol "]") typ) in
     let* arg = exp in
     let* cases = between (symbol "{") (symbol "}") (sep_by case (symbol "|")) in
     match Label.Map.of_alist cases with
@@ -179,7 +180,7 @@ and nil s =
   let parse =
     let* () = sym_nil in
     let* () = symbol "[" in
-    let* t = Typ.parse in
+    let* t = typ in
     let* () = symbol "]" in
     return (E.nil t)
   in
@@ -199,7 +200,7 @@ and lam s =
     let* _ = symbol "(" in
     let* argv = var_ident in
     let* _ = symbol ":" in
-    let* argt = Typ.parse in
+    let* argt = typ in
     let* _ = symbol ")" in
     let* argv, body = with_bound_var argv exp in
     return (E.lam ~argv ~argt ~body)

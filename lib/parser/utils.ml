@@ -20,6 +20,7 @@ let ident case =
 
 let prod_comp s = (ident lowercase) s
 let sum_const s = (ident uppercase) s
+let typ_ident s = (ident lowercase) s
 
 (* Handles parentheses: ( p ) *)
 let parens p = between (symbol "(") (symbol ")") p

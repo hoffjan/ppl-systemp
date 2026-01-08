@@ -6,9 +6,9 @@ let exit_with msg =
   exit 1
 
 (* --- Types --- *)
-let typ str =
+let typ ?(typ_of_str = fun _ -> failwith "No type variable function provided") str =
   (* parse_string takes: parser -> input -> user_state -> result *)
-  match parse_string (Typ.parse << eof) str () with
+  match parse_string (Typ.parse typ_of_str << eof) str () with
   | Success t -> t
   | Failed (msg, _) -> exit_with msg
 
