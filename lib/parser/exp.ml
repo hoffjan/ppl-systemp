@@ -51,27 +51,24 @@ let with_bound_var str p =
 (*   let*      *)
 (*     in parser s *)
 
-let rec exp s = atom_app_or_proj s
+let rec exp s = app s
 
-and atom_app_or_proj s =
-  let app e =
-    let* es = many (attempt atom) in
+and app s =
+  let parse =
+    let* e = proj in
+    let* es = many (attempt proj) in
     let f func arg = E.app ~func ~arg in
     return (List.fold ~init:e ~f es)
   in
-  let proj e =
-    let* _ = char '.' in
-    let* comp = prod_comp >>= fun str -> return (Label.of_string str) in
-    return (E.proj ~comp ~arg:e)
-  in
+  parse s
+
+and proj s =
   let parse =
     let* e = atom in
-    let* next = look_ahead any_char <|> (eof >> return 'X') in
-    match next with
-    | '.' ->
-        print_string "not good\n";
-        proj e
-    | _ -> app e
+    let proj = char '.' >> prod_comp >>= fun str -> return (Label.of_string str) in
+    let* projs = many (attempt proj) in
+    let f arg comp = E.proj ~comp ~arg in
+    return (List.fold ~init:e ~f projs)
   in
   parse s
 
