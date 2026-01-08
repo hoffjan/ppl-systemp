@@ -1,3 +1,3 @@
 
-let id = fn (x : int) x in
-let prod = < left = id , right = <one = <>> > in prod .right.one
+let id = fn (x : <>) x in
+let prod = < left = id , right = <one = <>> > in prod.id prod.right.one
