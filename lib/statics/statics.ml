@@ -12,6 +12,7 @@ module Statics_error = struct
     | Xnot_sum of Typ.t
     | Xnot_prod of Typ.t
     | Xnot_list of Typ.t
+    | Xcase_type_missing
     | Xcase_missing of { lable : Label.t; typ : Typ.t }
   [@@deriving sexp]
 
@@ -97,17 +98,25 @@ let rec syn_t gamma e =
       let arg_typ = syn_t gamma arg in
       begin match Typ.out arg_typ with
       | Typ.Tsum lmap ->
-          let () =
-            let f ~key ~data =
+          let types =
+            let f ~key ~data types =
               match Map.find cases key with
               | Some (x, e) ->
                   let t = syn_t (bind [ (x, data) ]) e in
-                  if Typ.(typ <> t) then raise (E (Xtype_mismatch { expected = typ; found = t })) else ()
+                  t :: types
               | None -> raise (E (Xcase_missing { lable = key; typ = arg_typ }))
             in
-            Map.iteri lmap ~f
+            Map.fold lmap ~f ~init:(match typ with None -> [] | Some t -> [ t ])
           in
-          typ
+          begin match types with
+          | [] -> raise (E Xcase_type_missing)
+          | typ :: types ->
+              let () =
+                let f t = if Typ.(typ <> t) then raise (E (Xtype_mismatch { expected = typ; found = t })) else () in
+                List.iter types ~f
+              in
+              typ
+          end
       | _ -> raise (E (Xnot_sum arg_typ))
       end
   | Eprod comps -> Typ.prod @@ Map.map comps ~f:(syn_t gamma)

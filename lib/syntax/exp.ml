@@ -11,7 +11,7 @@ type t =
   | APP of { func : t; arg : t }
   | PRIMAPP of { prim : Prim.t; args : t list }
   | INJ of { con : Label.t; typ : Typ.t Label.Map.t; arg : t }
-  | CASE of { arg : t; cases : (string * t) Label.Map.t; typ : Typ.t }
+  | CASE of { arg : t; cases : (string * t) Label.Map.t; typ : Typ.t option }
   | PROD of t Label.Map.t
   | PROJ of { comp : Label.t; arg : t }
   | LET of { e1 : t; x : string; e2 : t }
@@ -27,7 +27,7 @@ type view =
   | Eapp of { func : t; arg : t }
   | Eprimapp of { prim : Prim.t; args : t list }
   | Einj of { con : Label.t; typ : Typ.t Label.Map.t; arg : t }
-  | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t; typ : Typ.t }
+  | Ecase of { arg : t; cases : (Var.t * t) Label.Map.t; typ : Typ.t option }
   | Eprod of t Label.Map.t
   | Eproj of { comp : Label.t; arg : t }
   | Elet of { e1 : t; x : Var.t; e2 : t }

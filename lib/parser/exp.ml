@@ -105,7 +105,7 @@ and case s =
   in
   let parse =
     let* () = symbol "case" in
-    let* typ = between (symbol "[") (symbol "]") Typ.parse in
+    let* typ = option (between (symbol "[") (symbol "]") Typ.parse) in
     let* arg = exp in
     let* cases = between (symbol "{") (symbol "}") (sep_by case (symbol "|")) in
     match Label.Map.of_alist cases with
