@@ -96,7 +96,7 @@ let rec syn_t gamma e =
   | Ecase { arg; cases; typ } ->
       let arg_typ = syn_t gamma arg in
       begin match Typ.out arg_typ with
-      | Typ.Tprod lmap ->
+      | Typ.Tsum lmap ->
           let () =
             let f ~key ~data =
               match Map.find cases key with

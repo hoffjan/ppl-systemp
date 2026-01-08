@@ -15,6 +15,9 @@ let typ str =
 (* --- Types --- *)
 let exp str =
   (* parse_string takes: parser -> input -> user_state -> result *)
-  match parse_string (Exp.parse << eof) str { env = String.Map.empty; consts = Syntax.Label.Map.empty } with
+  match
+    parse_string (Exp.parse << eof) str
+      { types = String.Map.empty; env = String.Map.empty; consts = Syntax.Label.Map.empty }
+  with
   | Success t -> t
   | Failed (msg, _) -> exit_with msg

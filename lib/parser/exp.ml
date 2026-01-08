@@ -5,7 +5,7 @@ module E = Syntax.Exp
 module T = Syntax.Typ
 module Label = Syntax.Label
 
-let keywords = [ "fn"; "let"; "rec"; "in"; "Cons"; "Nil" ]
+let keywords = [ "fn"; "let"; "rec"; "in"; "Cons"; "Nil"; "type"; "case" ]
 let is_keyword str = List.mem keywords ~equal:String.( = ) str
 
 let var_ident s =
@@ -27,7 +27,11 @@ let sym_cons p =
   let* () = symbol ")" in
   return (head, tail)
 
-type ('a, 'b) parse_state = { env : (string, E.Var.t, 'a) Base.Map.t; consts : (Label.t, T.t, 'b) Base.Map.t }
+type ('a, 'b) parse_state = {
+  env : (string, E.Var.t, 'a) Base.Map.t;
+  consts : (Label.t, T.t Label.Map.t, 'b) Base.Map.t;
+  types : (string, T.t, 'a) Base.Map.t;
+}
 
 let var s =
   let parse =
@@ -45,11 +49,28 @@ let with_bound_var str p =
   let* () = set_user_state state in
   return (var, result)
 
-(* (\* currently type variables cannot appear in type declarations *\) *)
-(* let typ_dec s = *)
-(*   let parser = *)
-(*   let*      *)
-(*     in parser s *)
+(* currently type variables cannot appear in type declarations *)
+let typ_dec s =
+  let parser =
+    let* () = symbol "type" in
+    let* t_name = typ_ident in
+    let* () = symbol "=" in
+    let* t = Typ.parse in
+    let* ({ types; consts; _ } as state) = get_user_state in
+    match Map.find types t_name with
+    | Some _ -> fail ("Type " ^ t_name ^ " is already defined.")
+    | None -> (
+        let state = { state with types = Map.set types ~key:t_name ~data:t } in
+        match T.out t with
+        | T.Tsum lmap -> begin
+            try
+              let f ~key ~data:_ consts = Map.add_exn consts ~key ~data:lmap in
+              set_user_state { state with consts = Map.fold lmap ~init:consts ~f }
+            with _ -> fail "Constructor name used in multiple types."
+          end
+        | _ -> fail ("Type " ^ t_name ^ " is not a sum type."))
+  in
+  parser s
 
 let rec exp s = app s
 
@@ -72,7 +93,38 @@ and proj s =
   in
   parse s
 
-and atom s = (choice [ prod; lrec; let'; nil; cons; lam; var; parens exp ]) s
+and atom s = (choice [ case; inj; prod; lrec; let'; nil; cons; lam; var; parens exp ]) s
+
+and case s =
+  let case =
+    let* con = sum_const >>= fun str -> return (Label.of_string str) in
+    let* var = var_ident in
+    let* () = symbol "->" in
+    let* var_exp = with_bound_var var exp in
+    return (con, var_exp)
+  in
+  let parse =
+    let* () = symbol "case" in
+    let* typ = between (symbol "[") (symbol "]") Typ.parse in
+    let* arg = exp in
+    let* cases = between (symbol "{") (symbol "}") (sep_by case (symbol "|")) in
+    match Label.Map.of_alist cases with
+    | `Ok cases -> return (E.case ~typ ~arg ~cases)
+    | `Duplicate_key _ -> fail "Duplicated case."
+  in
+  parse s
+
+and inj s =
+  let parse =
+    let* con = sum_const >>= fun str -> return (Label.of_string str) in
+    let* { consts; _ } = get_user_state in
+    match Map.find consts con with
+    | None -> fail ("Contructor not defined: " ^ Label.to_string con)
+    | Some lmap ->
+        let* arg = exp in
+        return (E.inj ~con ~typ:lmap ~arg)
+  in
+  parse s
 
 and prod s =
   let comp s =
@@ -90,7 +142,7 @@ and prod s =
     let* () = symbol ">" in
     match Label.Map.of_alist comps with
     | `Ok lmap -> return (E.prod lmap)
-    | `Duplicate_key _ -> fail "Multiple components in product."
+    | `Duplicate_key _ -> fail "Component appears multiple times in product."
   in
   parse s
 
@@ -154,4 +206,4 @@ and lam s =
   in
   parse s
 
-let parse s = (spaces >> exp) s
+let parse s = (spaces >> many typ_dec >> exp) s
