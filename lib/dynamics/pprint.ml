@@ -53,7 +53,7 @@ let rec print_value v =
         print_string ",";
         print_space ()
       in
-      open_hbox ();
+      open_box 1;
       print_string "[";
       pp_print_list ~pp_sep (fun _ v -> print_value v) std_formatter vals;
       print_string "]";
