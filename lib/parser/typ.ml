@@ -21,7 +21,7 @@ let rec typ t_of_str s =
   parse s
 
 and var t_of_str = typ_ident >>= fun str -> return (t_of_str str)
-and atom t_of_str = choice [ base; prod t_of_str; sum t_of_str; parens (typ t_of_str); var t_of_str ]
+and atom t_of_str = choice [ var t_of_str; base; prod t_of_str; sum t_of_str; parens (typ t_of_str) ]
 
 and decs t_of_str l_sym r_sym label s =
   let dec s =

@@ -5,16 +5,7 @@ module E = Syntax.Exp
 module T = Syntax.Typ
 module Label = Syntax.Label
 
-let keywords = [ "fn"; "let"; "rec"; "in"; "Cons"; "Nil"; "type"; "case" ]
-let is_keyword str = List.mem keywords ~equal:String.( = ) str
-
-let var_ident s =
-  let parser =
-    let* str = look_ahead (ident lowercase) in
-    if is_keyword str then fail ("Expecting identifyer but found keyword: " ^ str) else ident lowercase
-  in
-  parser s
-
+let var_ident s = (ident lowercase) s
 let sym_nil s = (symbol "Nil") s
 
 let sym_cons p =
