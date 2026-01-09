@@ -53,4 +53,12 @@ let rec print_value v =
         print_string ",";
         print_space ()
       in
-      pp_print_list ~pp_sep (fun _ v -> print_value v) std_formatter vals
+      open_hbox ();
+      print_string "[";
+      pp_print_list ~pp_sep (fun _ v -> print_value v) std_formatter vals;
+      print_string "]";
+      close_box ()
+
+let print_value v =
+  let () = print_value v in
+  print_string "\n"

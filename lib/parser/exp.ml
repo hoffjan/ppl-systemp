@@ -64,6 +64,27 @@ let typ_dec s =
   in
   parser s
 
+let string s =
+  between (char '"') (char '"') (many_satisfy (fun c -> Char.(c <> '"')) |>> fun str -> E.const (E.Cstring str)) s
+
+let num s =
+  let digits = pipe2 digit (many digit) (fun d ds -> String.of_char_list (d :: ds)) in
+
+  let parse =
+    let* neg = option (char '-') |>> function None -> "" | Some _ -> "-" in
+    let* ds = digits in
+    let* dot = option (char '.') in
+    match dot with
+    | None -> return (E.const (E.Cint (Int.of_string (neg ^ ds))))
+    | Some _ ->
+        let* ds' = digits in
+        let f = neg ^ ds ^ "." ^ ds' in
+        return (E.const (E.Cfloat (Float.of_string f)))
+  in
+  parse s
+
+let const s = (lexeme (choice [ string; num ])) s
+
 let rec exp s = app s
 
 and app s =
@@ -78,18 +99,18 @@ and app s =
 and proj s =
   let parse =
     let* e = atom in
-    let proj = char '.' >> prod_comp >>= fun str -> return (Label.of_string str) in
+    let proj = char '.' >> prod_comp |>> fun str -> Label.of_string str in
     let* projs = many (attempt proj) in
     let f arg comp = E.proj ~comp ~arg in
     return (List.fold ~init:e ~f projs)
   in
   parse s
 
-and atom s = (choice [ case; inj; prod; lrec; let'; nil; cons; lam; var; parens exp ]) s
+and atom s = (choice [ const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
 
 and case s =
   let case =
-    let* con = sum_const >>= fun str -> return (Label.of_string str) in
+    let* con = sum_const |>> fun str -> Label.of_string str in
     let* var = var_ident in
     let* () = symbol "->" in
     let* var_exp = with_bound_var var exp in
@@ -108,7 +129,7 @@ and case s =
 
 and inj s =
   let parse =
-    let* con = sum_const >>= fun str -> return (Label.of_string str) in
+    let* con = sum_const |>> fun str -> Label.of_string str in
     let* { consts; _ } = get_user_state in
     match Map.find consts con with
     | None -> fail ("Contructor not defined: " ^ Label.to_string con)
@@ -198,4 +219,4 @@ and lam s =
   in
   parse s
 
-let parse s = (spaces >> many typ_dec >> exp) s
+let parse s = (spaces >> many (attempt typ_dec) >> exp) s
