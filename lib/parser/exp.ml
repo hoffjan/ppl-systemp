@@ -71,14 +71,13 @@ let num s =
   let digits = pipe2 digit (many digit) (fun d ds -> String.of_char_list (d :: ds)) in
 
   let parse =
-    let* neg = option (char '-') |>> function None -> "" | Some _ -> "-" in
     let* ds = digits in
     let* dot = option (char '.') in
     match dot with
-    | None -> return (E.const (E.Cint (Int.of_string (neg ^ ds))))
+    | None -> return (E.const (E.Cint (Int.of_string ds)))
     | Some _ ->
         let* ds' = digits in
-        let f = neg ^ ds ^ "." ^ ds' in
+        let f = ds ^ "." ^ ds' in
         return (E.const (E.Cfloat (Float.of_string f)))
   in
   parse s
@@ -218,5 +217,7 @@ and lam s =
     return (E.lam ~argv ~argt ~body)
   in
   parse s
+
+(* Binary operations *)
 
 let parse s = (spaces >> many (attempt typ_dec) >> exp) s
