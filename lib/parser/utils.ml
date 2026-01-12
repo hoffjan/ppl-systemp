@@ -3,7 +3,7 @@ open MParser
 
 exception Syntax_error
 
-let keywords = [ "fn"; "let"; "rec"; "in"; "Cons"; "Nil"; "type"; "case"; "int"; "float"; "string" ]
+let keywords = [ "fn"; "let"; "rec"; "in"; "Cons"; "Nil"; "type"; "case"; "int"; "float"; "string"; "list" ]
 let ( let* ) = bind
 
 (* --- 2. Lexing Helpers --- *)
