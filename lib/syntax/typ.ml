@@ -55,7 +55,7 @@ let list t = into @@ Tlist t
 let bool =
   sum
     (Label.Map.of_alist_exn
-       [ (Label.of_string "true", prod Label.Map.empty); (Label.of_string "false", prod Label.Map.empty) ])
+       [ (Label.of_string "True", prod Label.Map.empty); (Label.of_string "False", prod Label.Map.empty) ])
 
 let unit = prod Label.Map.empty
 

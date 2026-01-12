@@ -43,10 +43,10 @@ let rec print_value v =
         close_box ()
       in
       open_hvbox 1;
-      print_string "<";
+      print_string "{";
       pp_print_list ~pp_sep f std_formatter alist;
       print_space ();
-      print_string ">";
+      print_string "}";
       close_box ()
   | Vlist vals ->
       let pp_sep _ () =

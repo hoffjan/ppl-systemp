@@ -24,7 +24,7 @@ end
 open Dynamics_error
 
 let eval_prim (prim : Prim.t) arg_vals =
-  let bool_value b = Vinj (Label.of_string (if b then "true" else "false"), Vprod Label.Map.empty) in
+  let bool_value b = Vinj (Label.of_string (if b then "True" else "False"), Vprod Label.Map.empty) in
   match (prim, arg_vals) with
   | Neg, [ Vconst (Cint i) ] -> Vconst (Cint (-i))
   | Neg, [ Vconst (Cfloat f) ] -> Vconst (Cfloat (-.f))

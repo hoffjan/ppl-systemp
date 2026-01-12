@@ -21,7 +21,7 @@ let rec typ t_of_str s =
   parse s
 
 and var t_of_str = typ_ident >>= fun str -> return (t_of_str str)
-and atom t_of_str = choice [ base; var t_of_str; prod t_of_str; sum t_of_str; parens (typ t_of_str) ]
+and atom t_of_str = choice [ attempt (var t_of_str); base; prod t_of_str; sum t_of_str; parens (typ t_of_str) ]
 
 and decs t_of_str l_sym r_sym label s =
   let dec s =
@@ -41,7 +41,7 @@ and decs t_of_str l_sym r_sym label s =
   in
   parse s
 
-and prod t_of_str s = (decs t_of_str "<" ">" prod_comp >>= fun lmap -> return (Typ.prod lmap)) s
+and prod t_of_str s = (decs t_of_str "{" "}" prod_comp >>= fun lmap -> return (Typ.prod lmap)) s
 and sum t_of_str s = (decs t_of_str "[" "]" sum_const >>= fun lmap -> return (Typ.sum lmap)) s
 
 and list t_of_str =

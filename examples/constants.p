@@ -6,4 +6,4 @@ let l = Cons(1.1,Cons (1.2,Nil[float])) in
 let l = append l l in
 let l = append l l in
 let t = Cons(1,Nil[int]) in
-< left = append l (append l l), right = l >
+{ left = append l (append l l), right = l }

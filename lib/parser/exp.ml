@@ -41,7 +41,6 @@ let with_bound_var str p =
   let* () = set_user_state state in
   return (var, result)
 
-(* currently type variables cannot appear in type declarations *)
 let typ_dec s =
   let parser =
     let* () = symbol "type" in
@@ -84,7 +83,26 @@ let num s =
 
 let const s = (lexeme (choice [ string; num ])) s
 
-let rec exp s = app s
+(* Binary operations *)
+
+let infix sym prim =
+  let op e1 e2 = E.primapp ~prim ~args:[ e1; e2 ] in
+  Infix (symbol sym >> return op, Assoc_left)
+
+let prefix sym prim =
+  let op e = E.primapp ~prim ~args:[ e ] in
+  Prefix (symbol sym >> return op)
+
+let operators () =
+  let open Syntax.Prim in
+  [
+    [ prefix "-" Neg ];
+    [ infix "*" Times; infix "/" Div; infix "%" Mod ];
+    [ infix "+" Plus; infix "-" Minus ];
+    [ infix "=" Eq; infix "/=" Neq; infix "<" Lt; infix "<=" Lte; infix ">" Gt; infix ">=" Gte ];
+  ]
+
+let rec exp s = (expression (operators ()) app) s
 
 and app s =
   let parse =
@@ -149,9 +167,9 @@ and prod s =
     parse s
   in
   let parse =
-    let* () = symbol "<" in
+    let* () = symbol "{" in
     let* comps = sep_by comp (symbol ",") in
-    let* () = symbol ">" in
+    let* () = symbol "}" in
     match Label.Map.of_alist comps with
     | `Ok lmap -> return (E.prod lmap)
     | `Duplicate_key _ -> fail "Component appears multiple times in product."
@@ -217,7 +235,5 @@ and lam s =
     return (E.lam ~argv ~argt ~body)
   in
   parse s
-
-(* Binary operations *)
 
 let parse s = (spaces >> many (attempt typ_dec) >> exp) s
