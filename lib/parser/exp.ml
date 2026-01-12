@@ -236,4 +236,4 @@ and lam s =
   in
   parse s
 
-let parse s = (spaces >> many (attempt typ_dec) >> exp) s
+let parse s = (spaces >> many typ_dec >> exp) s
