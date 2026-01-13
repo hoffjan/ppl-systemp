@@ -17,7 +17,11 @@ let isort = fn (l : int list)
     | Cons (x,r) -> insert x r }
 in
 
+let append = fn (l1 : int list) fn (l2 : int list)
+  rec l1 { Nil -> l2 | Cons(x,r) -> Cons(x,r) }
+in    
+
 let l = Cons(9,Cons(5,Cons(8,Cons(-1,Nil[int])))) in
 
-isort l
+{ res1 = isort l, res2 = isort (append l (append l l)) }
 		 
