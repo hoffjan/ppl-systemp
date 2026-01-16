@@ -11,7 +11,11 @@ tags: ["System T" "probabiliistc programming" "programming language"]
 homepage: "https://github.com/hoffjan/systemp"
 bug-reports: "https://github.com/hoffjan/systemp/issues"
 depends: [
+  "ocaml"
   "dune" {>= "3.17"}
+  "core"
+  "core_unix"
+  "mparser"
   "odoc" {with-doc}
 ]
 build: [
