@@ -28,4 +28,3 @@ let addall = fn (l : arith list)
 { res1 = add l
 , res2 = multadd l2
 }
-

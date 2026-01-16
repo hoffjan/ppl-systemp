@@ -20,6 +20,6 @@
 ;;  (synopsis "System P")
 ;;  (description
 ;;   "An implementation of a probabilistic programming language that extends Goedel's System T.")
-;;  (depends ocaml dune core mparser)
+;;  (depends ocaml dune core core_unix mparser)
 ;;  (tags
 ;;   ("System T" "probabiliistc programming" "programming language")))
