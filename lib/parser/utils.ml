@@ -1,8 +1,6 @@
 open Core
 open MParser
 
-exception Syntax_error
-
 let keywords = [ "fn"; "let"; "rec"; "in"; "Cons"; "Nil"; "type"; "case"; "int"; "float"; "string"; "list" ]
 let ( let* ) = bind
 

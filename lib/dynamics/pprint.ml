@@ -2,8 +2,6 @@ open Core
 open Format
 open Syntax
 
-exception Print_error of string
-
 let print_constant e =
   match e with Exp.Cint n -> print_int n | Exp.Cfloat q -> print_float q | Exp.Cstring s -> print_string s
 
