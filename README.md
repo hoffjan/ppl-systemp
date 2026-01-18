@@ -44,14 +44,42 @@ The following files contain additional information
 
 The deterministic fragment of System P contains functions, lists, primitive recursion on lists, labeled products and sums, and constants and primitive operations for integers, floats, and strings. Expressions are defined as follows.
 
-e ::= IDENT     (variable)
-      CONST     (constant)
+EXP ::= ID                                       (variable)
+        CONST                 					 (constant)
+        ID (ID ':' TYPE) EXP    				 (function abstraction)
+		EXP EXP                                  (function application)
+		OP EXP                					 (unary operator)
+		EXP OP EXP            				  	 (binary operator)
+		CID EXP                                  (injection)
+		'case' ['[' TYPE ']'] EXP CASES          (case analysis)
+		'{' [ID '=' EXP (',' ID '=' EXP)* ] '}'  (product)
+		EXP '.' ID                               (projection)
+		'let' ID = EXP 'in' EXP                  (let binding)
+		'Nil' '[' TYPE ']'                       (empty list)
+        'Cons' '(' EXP ',' EXP ')'               (non-empty list)
+		'rec' EXP "{" "Nil" "->" EXP " |" "Cons" (recursor) 
+	        "(" ID "," "ID" ")" "->" EXP "}"
 
-IDENT ::= ( a-z ) ( a-z | A-Z )*
+ID ::= ( a-z ) ( a-z | A-Z )*
 
-CONST ::= FLOAT | INT
+CID ::= ( A-Z ) ( a-z | A-Z )*
+
+CASES = '{' [ CID ID '->' EXP ('|' CID ID '->' EXP)* ] '}'
+
+CONST ::= FLOAT | INT | STRING
+
 
 ## Usage
+
+  systemp SUBCOMMAND
+
+=== subcommands ===
+
+  eval FILENAME              . Evaluate a System P program
+  typecheck FILENAME         . Evaluate a System P program
+  version                    . print version information
+  help                       . explain a given subcommand (perhaps recursively)
+
 
 
 
