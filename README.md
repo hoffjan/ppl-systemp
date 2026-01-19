@@ -79,7 +79,3 @@ CONST ::= FLOAT | INT | STRING
   typecheck FILENAME         . Evaluate a System P program
   version                    . print version information
   help                       . explain a given subcommand (perhaps recursively)
-
-
-
-
