@@ -1,3 +1,5 @@
+[![Build SystemP](https://github.com/hoffjan/systemp/actions/workflows/build.yml/badge.svg)](https://github.com/hoffjan/systemp/actions/workflows/build.yml)
+
 # System P
 
 System P is a probabilistic programming language based on System P. It

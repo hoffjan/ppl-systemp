@@ -1,0 +1,43 @@
+name: Build SystemP
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          # - macos-latest
+        ocaml:
+          - 5
+          # - 4
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Set-up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml }}
+
+      - name: Install SystemP (and deps)
+        run: opam install . --yes
+
+      - name: Typecheck example
+        run: |
+          opam exec -- systemp typecheck examples/constants.p
+          opam exec -- systemp eval examples/constants.p
