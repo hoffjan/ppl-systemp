@@ -40,6 +40,8 @@ The following files contain additional information
 
    The binary file systemp should now be in your path.
 
+   [FS: I needed to write `opam install .` to build systemp, not just deps.]
+
 ## Syntax
 
 The deterministic fragment of System P contains functions, lists, primitive recursion on lists, labeled products and sums, and constants and primitive operations for integers, floats, and strings. Expressions are defined as follows.
