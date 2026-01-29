@@ -20,7 +20,7 @@ The following files contain additional information
 
   System P has been checked to build with the following OCaml versions: 4.14.2
 
-- POSIX compliant OS
+- [POSIX](https://en.wikipedia.org/wiki/POSIX)-compliant Operating System
 
 ## Building System P
 
@@ -31,14 +31,14 @@ The following files contain additional information
    This should include updating your shell environment by running the
    following.
 
-   eval `opam config env`
+        eval `opam config env`
 
 2) Clone the System P repository
 
 3) In the toplevel directory of the repository, run the following
    command
 
-   opam install .
+        opam install .
 
    The binary file systemp should now be in your path.
 
