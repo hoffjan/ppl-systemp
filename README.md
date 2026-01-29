@@ -1,4 +1,4 @@
-[![Build SystemP](https://github.com/hoffjan/systemp/actions/workflows/build.yml/badge.svg)](https://github.com/hoffjan/systemp/actions/workflows/build.yml)
+[![Build SystemP](https://github.com/hoffjan/ppl-systemp/actions/workflows/build.yml/badge.svg)](https://github.com/hoffjan/ppl-systemp/actions/workflows/build.yml)
 
 # System P
 
