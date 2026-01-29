@@ -1,0 +1,6 @@
+(executable
+ (public_name systemp)
+ (name main)
+ (modules main version cli)
+ (libraries parser dynamics statics core core_unix.command_unix core_unix.filename_unix)
+ (preprocess (pps ppx_jane)))
