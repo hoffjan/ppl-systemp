@@ -38,11 +38,9 @@ The following files contain additional information
 3) In the toplevel directory of the repository, run the following
    command
 
-   opam install --deps-only .
+   opam install .
 
    The binary file systemp should now be in your path.
-
-   [FS: I needed to write `opam install .` to build systemp, not just deps.]
 
 ## Syntax
 
