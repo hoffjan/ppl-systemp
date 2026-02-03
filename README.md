@@ -48,6 +48,7 @@ The following files contain additional information
 
 The deterministic fragment of System P contains functions, lists, primitive recursion on lists, labeled products and sums, and constants and primitive operations for integers, floats, and strings. Expressions are defined as follows.
 
+```
 EXP ::= ID                                       (variable)
         CONST                 					 (constant)
         ID (ID ':' TYPE) EXP    				 (function abstraction)
@@ -71,10 +72,11 @@ CID ::= ( A-Z ) ( a-z | A-Z )*
 CASES = '{' [ CID ID '->' EXP ('|' CID ID '->' EXP)* ] '}'
 
 CONST ::= FLOAT | INT | STRING
-
+```
 
 ## Usage
 
+```
   systemp SUBCOMMAND
 
 === subcommands ===
@@ -83,3 +85,4 @@ CONST ::= FLOAT | INT | STRING
   typecheck FILENAME         . Evaluate a System P program
   version                    . print version information
   help                       . explain a given subcommand (perhaps recursively)
+```
