@@ -56,20 +56,20 @@ grammar.
 PROG ::= ('type' ID '=' SUMTYPE)* EXP
 
 EXP ::= ID                                       (variable)
-        CONST                 					 (constant)
-        ID (ID ':' TYPE) EXP    				 (function abstraction)
-		EXP EXP                                  (function application)
-		OP EXP                					 (unary operator)
-		EXP OP EXP            				  	 (binary operator)
-		CID EXP                                  (injection; sum introduction)
-		'case' ['[' TYPE ']'] EXP CASES          (case analysis; sum elimination)
-		'{' [ID '=' EXP (',' ID '=' EXP)*] '}'   (named tuple; product introduction)
-		EXP '.' ID                               (projection; product elimination)
-		'let' ID = EXP 'in' EXP                  (let binding)
-		'Nil' '[' TYPE ']'                       (empty list)
+        CONST                                    (constant)
+        ID (ID ':' TYPE) EXP                     (function abstraction)
+        EXP EXP                                  (function application)
+        OP EXP                                   (unary operator)
+        EXP OP EXP                               (binary operator)
+        CID EXP                                  (injection; sum introduction)
+        'case' ['[' TYPE ']'] EXP CASES          (case analysis; sum elimination)
+        '{' [ID '=' EXP (',' ID '=' EXP)*] '}'   (named tuple; product introduction)
+        EXP '.' ID                               (projection; product elimination)
+        'let' ID = EXP 'in' EXP                  (let binding)
+        'Nil' '[' TYPE ']'                       (empty list)
         'Cons' '(' EXP ',' EXP ')'               (nonempty list)
-		'rec' EXP "{" "Nil" "->" EXP " |" "Cons" (list recursor)
-	        "(" ID "," "ID" ")" "->" EXP "}"
+        'rec' EXP "{" "Nil" "->" EXP " |" "Cons" (list recursor)
+          "(" ID "," "ID" ")" "->" EXP "}"
 
 ID ::= ( a-z ) ( a-z | A-Z )*
 
