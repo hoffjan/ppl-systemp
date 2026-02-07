@@ -1,4 +1,4 @@
-let insert = fn (x:int) fn (l: int list) 
+let insert = fn (l: int list) fn (x:int) 
   let res =
     rec l
       { Nil -> { li = Nil[int], smallest = x }
@@ -11,10 +11,20 @@ let insert = fn (x:int) fn (l: int list)
     Cons(res.smallest,res.li)
 in
 
+let insert = fn (l : int list)
+  rec l
+  { Nil -> fn (x : int) Cons(x,Nil[int])
+  | Cons(y,f) ->
+    fn (x : int)
+      case x<y
+      { True n -> Cons (x, f y)
+      | False n -> Cons(y, f x) } }   
+in
+
 let isort = fn (l : int list)
   rec l
     { Nil -> Nil[int]
-    | Cons (x,r) -> insert x r }
+    | Cons (x,r) -> insert r x }
 in
 
 let append = fn (l1 : int list) fn (l2 : int list)
