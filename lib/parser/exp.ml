@@ -98,7 +98,7 @@ let operators () =
   [
     [ prefix "-" Neg ];
     [ infix "*" Times; infix "/" Div; infix "%" Mod ];
-    [ infix "+" Plus; infix "-" Minus ];
+    [ infix "+" Plus; infix "-" Minus; infix "^" Concat ];
     [ infix "=" Eq; infix "/=" Neq; infix "<" Lt; infix "<=" Lte; infix ">" Gt; infix ">=" Gte ];
   ]
 
@@ -123,7 +123,7 @@ and proj s =
   in
   parse s
 
-and atom s = (choice [ const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
+and atom s = (choice [ to_string; const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
 
 and case s =
   let case =
@@ -202,6 +202,14 @@ and let' s =
     let* () = symbol "in" in
     let* x, e2 = with_bound_var x exp in
     return (E.let' ~e1 ~x ~e2)
+  in
+  parse s
+
+and to_string s =
+  let parse =
+    let* () = symbol "toString" in
+    let* e = exp in
+    return (E.primapp ~prim:Tostring ~args:[ e ])
   in
   parse s
 

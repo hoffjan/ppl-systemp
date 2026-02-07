@@ -25,36 +25,57 @@ open Statics_error
 
 let syn_prim_t prim arg_types =
   let open Prim in
+  let err () = raise (E (Xprim { prim; args = arg_types })) in
   match (prim, List.map arg_types ~f:Typ.out) with
   | Neg, [ Tbase Bint ] -> Typ.base Bint
   | Neg, [ Tbase Bfloat ] -> Typ.base Bfloat
+  | Neg, _ -> err ()
   | Sqrt, [ Tbase Bfloat ] -> Typ.base Bfloat
+  | Sqrt, _ -> err ()
   | Plus, [ Tbase Bint; Tbase Bint ] -> Typ.base Bint
   | Plus, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.base Bfloat
+  | Plus, _ -> err ()
   | Minus, [ Tbase Bint; Tbase Bint ] -> Typ.base Bint
   | Minus, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.base Bfloat
+  | Minus, _ -> err ()
   | Times, [ Tbase Bint; Tbase Bint ] -> Typ.base Bint
   | Times, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.base Bfloat
+  | Times, _ -> err ()
   | Div, [ Tbase Bint; Tbase Bint ] -> Typ.base Bint
   | Div, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.base Bfloat
+  | Div, _ -> err ()
   | Mod, [ Tbase Bint; Tbase Bint ] -> Typ.base Bint
   | Mod, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.base Bfloat
+  | Mod, _ -> err ()
   | Lt, [ Tbase Bint; Tbase Bint ] -> Typ.bool
   | Lt, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.bool
+  | Lt, [ Tbase Bstring; Tbase Bstring ] -> Typ.bool
+  | Lt, _ -> err ()
   | Lte, [ Tbase Bint; Tbase Bint ] -> Typ.bool
   | Lte, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.bool
+  | Lte, [ Tbase Bstring; Tbase Bstring ] -> Typ.bool
+  | Lte, _ -> err ()
   | Gt, [ Tbase Bint; Tbase Bint ] -> Typ.bool
   | Gt, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.bool
+  | Gt, [ Tbase Bstring; Tbase Bstring ] -> Typ.bool
+  | Gt, _ -> err ()
   | Gte, [ Tbase Bint; Tbase Bint ] -> Typ.bool
   | Gte, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.bool
+  | Gte, [ Tbase Bstring; Tbase Bstring ] -> Typ.bool
+  | Gte, _ -> err ()
   | Eq, [ Tbase Bint; Tbase Bint ] -> Typ.bool
   | Eq, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.bool
   | Eq, [ Tbase Bstring; Tbase Bstring ] -> Typ.bool
+  | Eq, _ -> err ()
   | Neq, [ Tbase Bint; Tbase Bint ] -> Typ.bool
   | Neq, [ Tbase Bfloat; Tbase Bfloat ] -> Typ.bool
   | Neq, [ Tbase Bstring; Tbase Bstring ] -> Typ.bool
-  | Append, [ Tbase Bstring; Tbase Bstring ] -> Typ.base Bstring
-  | _ -> raise (E (Xprim { prim; args = arg_types }))
+  | Neq, _ -> err ()
+  | Concat, [ Tbase Bstring; Tbase Bstring ] -> Typ.base Bstring
+  | Concat, _ -> err ()
+  | Tostring, [ Tbase Bint ] -> Typ.base Bstring
+  | Tostring, [ Tbase Bfloat ] -> Typ.base Bstring
+  | Tostring, _ -> err ()
 
 let rec syn_t gamma e =
   let lookup x = match Map.find gamma x with Some t -> t | None -> raise (E (Xvar_not_found x)) in

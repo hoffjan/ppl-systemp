@@ -3,7 +3,10 @@ open Format
 open Syntax
 
 let print_constant e =
-  match e with Exp.Cint n -> print_int n | Exp.Cfloat q -> print_float q | Exp.Cstring s -> print_string s
+  match e with
+  | Exp.Cint n -> print_int n
+  | Exp.Cfloat q -> print_float q
+  | Exp.Cstring s -> print_string ("\"" ^ s ^ "\"")
 
 let print_label l =
   let str = Label.to_string l in
