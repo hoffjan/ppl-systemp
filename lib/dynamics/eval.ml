@@ -12,7 +12,7 @@ type value =
 module Dynamics_error = struct
   type t =
     | Xvar_not_found of Var.t
-    | Xprim of Prim.t * value list
+    | Xprim of Prim.Op.t * value list
     | Xmalformed of Exp.t
     | Xmissing_label of Exp.t * Label.t
 
@@ -23,7 +23,7 @@ end
 
 open Dynamics_error
 
-let eval_prim (prim : Prim.t) arg_vals =
+let eval_prim (prim : Prim.Op.t) arg_vals =
   let err () = raise (E (Xprim (prim, arg_vals))) in
   let bool_value b = Vinj (Label.of_string (if b then "True" else "False"), Vprod Label.Map.empty) in
   match (prim, arg_vals) with

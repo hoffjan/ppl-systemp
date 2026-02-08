@@ -94,7 +94,7 @@ let prefix sym prim =
   Prefix (symbol sym >> return op)
 
 let operators () =
-  let open Syntax.Prim in
+  let open Syntax.Prim.Op in
   [
     [ prefix "-" Neg ];
     [ infix "*" Times; infix "/" Div; infix "%" Mod ];

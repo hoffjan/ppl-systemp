@@ -1,9 +1,11 @@
 open Core
 
-module T = struct
-  type t = Neg | Plus | Minus | Times | Div | Mod | Eq | Neq | Lt | Lte | Gt | Gte | Sqrt | Concat | Tostring
-  [@@deriving compare, sexp]
-end
+module Op = struct
+  module T = struct
+    type t = Neg | Plus | Minus | Times | Div | Mod | Eq | Neq | Lt | Lte | Gt | Gte | Sqrt | Concat | Tostring
+    [@@deriving compare, sexp]
+  end
 
-include T
-include Comparable.Make (T)
+  include T
+  include Comparable.Make (T)
+end

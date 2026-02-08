@@ -6,7 +6,7 @@ module Statics_error = struct
     | Xvar_not_found of Exp.Var.t
     | Xnot_an_arrow of Typ.t
     | Xtype_mismatch of { expected : Typ.t; found : Typ.t }
-    | Xprim of { prim : Prim.t; args : Typ.t list }
+    | Xprim of { prim : Prim.Op.t; args : Typ.t list }
     | Xlabel_type of { label : Label.t; expected : Typ.t; found : Typ.t }
     | Xlabel_missing of { label : Label.t; typ : Typ.t }
     | Xnot_sum of Typ.t
@@ -24,7 +24,7 @@ end
 open Statics_error
 
 let syn_prim_t prim arg_types =
-  let open Prim in
+  let open Prim.Op in
   let err () = raise (E (Xprim { prim; args = arg_types })) in
   match (prim, List.map arg_types ~f:Typ.out) with
   | Neg, [ Tbase Bint ] -> Typ.base Bint
