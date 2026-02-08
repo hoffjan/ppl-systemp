@@ -18,7 +18,7 @@ let print_label l =
   print_string str
 
 let rec print_value v =
-  let open Eval in
+  let open Value in
   match v with
   | Vconst c -> print_constant c
   | Vlam _ -> print_string "<fun>"

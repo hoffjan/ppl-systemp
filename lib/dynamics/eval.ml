@@ -1,18 +1,12 @@
 open Core
 open Syntax
 module Var = Var.Exp_var
-
-type value =
-  | Vconst of Exp.const
-  | Vlam of (value -> value)
-  | Vinj of Label.t * value
-  | Vprod of value Label.Map.t
-  | Vlist of value List.t
+open Value
 
 module Dynamics_error = struct
   type t =
     | Xvar_not_found of Var.t
-    | Xprim of Prim.Op.t * value list
+    | Xprim of Prim.Op.t * Value.t list
     | Xmalformed of Exp.t
     | Xmissing_label of Exp.t * Label.t
 
