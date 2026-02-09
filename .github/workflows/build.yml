@@ -39,5 +39,5 @@ jobs:
 
       - name: Typecheck example
         run: |
-          opam exec -- systemp typecheck examples/constants.p
-          opam exec -- systemp eval examples/constants.p
+          opam exec -- systemp typecheck examples/deterministic/constants.p
+          opam exec -- systemp eval examples/deterministic/constants.p
