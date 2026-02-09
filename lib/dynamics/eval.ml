@@ -124,3 +124,11 @@ let rec eval ctx exp =
   | Esamp _ -> failwith "not implemented"
 
 let eval = eval Var.Map.empty
+
+(* generate : ~trace:Trace.t ?seed:int -> result
+   where resutl = {trace:Trace.t; weight:float; value:Value.t }
+   
+   implement eval : ctx -> exp -> val as local function to generate
+
+   for weigh: check if returned trace has the same size as input
+*)

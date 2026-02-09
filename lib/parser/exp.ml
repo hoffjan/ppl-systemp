@@ -3,6 +3,7 @@ open MParser
 open Utils
 module E = Syntax.Exp
 module T = Syntax.Typ
+module Dist = Syntax.Prim.Dist
 module Label = Syntax.Label
 
 let var_ident s = (ident lowercase) s
@@ -81,6 +82,11 @@ let num s =
   in
   parse s
 
+let dist s =
+  let binom = symbol "binom" >> return Dist.Dbinomial in
+  let parse = choice [ binom ] in
+  parse s
+
 let const s = (lexeme (choice [ string; num ])) s
 
 (* Binary operations *)
@@ -123,7 +129,7 @@ and proj s =
   in
   parse s
 
-and atom s = (choice [ to_string; const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
+and atom s = (choice [ sample; to_string; const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
 
 and case s =
   let case =
@@ -241,6 +247,17 @@ and lam s =
     let* _ = symbol ")" in
     let* argv, body = with_bound_var argv exp in
     return (E.lam ~argv ~argt ~body)
+  in
+  parse s
+
+and sample s =
+  let parse =
+    let* () = symbol "sample" in
+    let* dist = dist in
+    let* param = exp in
+    let* () = symbol "at" in
+    let* addr = exp in
+    return (E.samp ~addr ~dist ~param)
   in
   parse s
 

@@ -1,7 +1,32 @@
 open Core
 open MParser
 
-let keywords = [ "fn"; "let"; "rec"; "in"; "Cons"; "Nil"; "type"; "case"; "int"; "float"; "string"; "list"; "toString" ]
+let keywords =
+  [
+    "fn";
+    "let";
+    "rec";
+    "in";
+    "Cons";
+    "Nil";
+    "type";
+    "case";
+    "int";
+    "float";
+    "string";
+    "list";
+    "toString";
+    "true";
+    "false";
+    "if";
+    "then";
+    "else";
+    "sample";
+    "at";
+    "bern";
+    "binom";
+  ]
+
 let ( let* ) = bind
 
 (* --- 2. Lexing Helpers --- *)
