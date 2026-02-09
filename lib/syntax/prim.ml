@@ -9,3 +9,12 @@ module Op = struct
   include T
   include Comparable.Make (T)
 end
+
+module Dist = struct
+  module T = struct
+    type t = Dbinomial [@@deriving compare, sexp]
+  end
+
+  include T
+  include Comparable.Make (T)
+end

@@ -6,3 +6,10 @@ module Op : sig
   include Comparable.S with type t := t
   include Sexpable.S with type t := t
 end
+
+module Dist : sig
+  type t = Dbinomial
+
+  include Comparable.S with type t := t
+  include Sexpable.S with type t := t
+end
