@@ -14,6 +14,8 @@ module Statics_error = struct
     | Xnot_list of Typ.t
     | Xcase_type_missing
     | Xcase_missing of { lable : Label.t; typ : Typ.t }
+    | Xnot_string of Typ.t
+    | Xdist of { dist : Prim.Dist.t; param_type : Typ.t }
   [@@deriving sexp]
 
   exception E of t
@@ -76,6 +78,16 @@ let syn_prim_t prim arg_types =
   | Tostring, [ Tbase Bint ] -> Typ.base Bstring
   | Tostring, [ Tbase Bfloat ] -> Typ.base Bstring
   | Tostring, _ -> err ()
+
+let dist_type dist =
+  let open Prim.Dist in
+  let t_int = Typ.base Bint in
+  let t_float = Typ.base Bfloat in
+  let t_prod l =
+    let f (s, t) = (Label.of_string s, t) in
+    Typ.prod (Label.Map.of_alist_exn (List.map ~f l))
+  in
+  match dist with Dbinomial -> (t_prod [ ("p", t_float); ("n", t_int) ], t_int)
 
 let rec syn_t gamma e =
   let lookup x = match Map.find gamma x with Some t -> t | None -> raise (E (Xvar_not_found x)) in
@@ -170,6 +182,13 @@ let rec syn_t gamma e =
           if Typ.(t_base = t_step) then t_base else raise (E (Xtype_mismatch { expected = t_base; found = t_step }))
       | _ -> raise (E (Xnot_list t_arg))
       end
+  | Esamp { addr; dist; param } ->
+      let () =
+        let addr_type = syn_t gamma addr in
+        match Typ.out addr_type with Typ.Tbase Bstring -> () | _ -> raise (E (Xnot_string addr_type))
+      in
+      let t_param, t_result = dist_type dist in
+      if Typ.(t_param = syn_t gamma param) then t_result else raise (E (Xdist { dist; param_type = t_param }))
 
 let type_exp e =
   try syn_t Exp.Var.Map.empty e

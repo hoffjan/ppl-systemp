@@ -121,5 +121,6 @@ let rec eval ctx exp =
             eval (bind [ (headv, v_head); (recv, v_rec) ]) step
       in
       eval_lrec vs
+  | Esamp _ -> failwith "not implemented"
 
 let eval = eval Var.Map.empty
