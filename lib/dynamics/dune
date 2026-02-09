@@ -1,6 +1,6 @@
 (library
  (name dynamics)
- (modules eval value pprint)
+ (modules eval value trace pprint)
  (libraries core syntax)
  (preprocess
   (pps ppx_compare ppx_sexp_conv ppx_variants_conv)))
