@@ -4,7 +4,13 @@ type t_base = Bint | Bfloat | Bstring [@@deriving compare, sexp]
 
 module Var = Var.Typ_var
 
-type t = BASE of t_base | ARR of { argt : t; rest : t } | SUM of t Label.Map.t | PROD of t Label.Map.t | LIST of t
+type t =
+  | BASE of t_base
+  | ARR of { argt : t; rest : t }
+  | SUM of t Label.Map.t
+  | PROD of t Label.Map.t
+  | LIST of t
+  | DIST of t
 [@@deriving sexp, compare]
 
 type view =
@@ -13,6 +19,7 @@ type view =
   | Tsum of t Label.Map.t
   | Tprod of t Label.Map.t
   | Tlist of t
+  | Tdist of t
 
 let into = function
   | Tbase b -> BASE b
@@ -20,6 +27,7 @@ let into = function
   | Tsum ts -> SUM ts
   | Tprod ts -> PROD ts
   | Tlist t -> LIST t
+  | Tdist t -> DIST t
 
 let out = function
   | BASE b -> Tbase b
@@ -27,6 +35,7 @@ let out = function
   | SUM ts -> Tsum ts
   | PROD ts -> Tprod ts
   | LIST t -> Tlist t
+  | DIST t -> Tdist t
 
 let subst _ _ t2 = t2
 let frees _ = Var.Set.empty
@@ -45,12 +54,14 @@ let rec to_string : t -> string =
       let factor (_, ty) = Printf.sprintf "%s" (to_string ty) in
       Printf.sprintf "(%s)" (String.concat ~sep:" * " (List.map (Map.to_alist lmaptyp) ~f:factor))
   | Tlist t -> to_string t ^ " list"
+  | Tdist t -> to_string t ^ " dist"
 
 let base bt = into @@ Tbase bt
 let arr ~argt ~rest = into @@ Tarr { argt; rest }
 let sum ts = into @@ Tsum ts
 let prod ts = into @@ Tprod ts
 let list t = into @@ Tlist t
+let dist t = into @@ Tdist t
 
 let bool =
   sum

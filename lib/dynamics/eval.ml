@@ -122,6 +122,7 @@ let rec eval ctx exp =
       in
       eval_lrec vs
   | Esamp _ -> failwith "not implemented"
+  | Edist _ -> failwith "not implemented"
 
 let eval = eval Var.Map.empty
 

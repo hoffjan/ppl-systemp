@@ -17,7 +17,8 @@ type view =
   | Enil of Typ.t
   | Econs of { head : t; tail : t }
   | Elrec of { arg : t; base : t; headv : Var.t; recv : Var.t; step : t }
-  | Esamp of { addr : t; dist : Prim.Dist.t; param : t }
+  | Esamp of { addr : t; dist : t }
+  | Edist of Prim.Dist.t
 
 (* basics *)
 val into : view -> t
@@ -38,7 +39,8 @@ val let' : e1:t -> x:Var.t -> e2:t -> t
 val nil : Typ.t -> t
 val cons : head:t -> tail:t -> t
 val lrec : arg:t -> base:t -> headv:Var.t -> recv:Var.t -> step:t -> t
-val samp : addr:t -> dist:Prim.Dist.t -> param:t -> t
+val samp : addr:t -> dist:t -> t
+val dist : Prim.Dist.t -> t
 
 (* extras *)
 val to_string : t -> string

@@ -15,7 +15,7 @@ module Statics_error = struct
     | Xcase_type_missing
     | Xcase_missing of { lable : Label.t; typ : Typ.t }
     | Xnot_string of Typ.t
-    | Xdist of { dist : Prim.Dist.t; param_type : Typ.t }
+    | Xnot_dist of Typ.t
   [@@deriving sexp]
 
   exception E of t
@@ -182,13 +182,16 @@ let rec syn_t gamma e =
           if Typ.(t_base = t_step) then t_base else raise (E (Xtype_mismatch { expected = t_base; found = t_step }))
       | _ -> raise (E (Xnot_list t_arg))
       end
-  | Esamp { addr; dist; param } ->
+  | Esamp { addr; dist } -> (
       let () =
         let addr_type = syn_t gamma addr in
         match Typ.out addr_type with Typ.Tbase Bstring -> () | _ -> raise (E (Xnot_string addr_type))
       in
-      let t_param, t_result = dist_type dist in
-      if Typ.(t_param = syn_t gamma param) then t_result else raise (E (Xdist { dist; param_type = t_param }))
+      let t_dist = syn_t gamma dist in
+      match Typ.out t_dist with Typ.Tdist t -> t | _ -> raise (E (Xnot_dist t_dist)))
+  | Edist dist ->
+      let argt, rest = dist_type dist in
+      Typ.arr ~argt ~rest:(Typ.dist rest)
 
 let type_exp e =
   try syn_t Exp.Var.Map.empty e

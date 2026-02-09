@@ -18,7 +18,8 @@ type t =
   | NIL of Typ.t
   | CONS of { head : t; tail : t }
   | LREC of { arg : t; base : t; headv : string; recv : string; step : t }
-  | SAMP of { addr : t; dist : Prim.Dist.t; param : t }
+  | SAMP of { addr : t; dist : t }
+  | DIST of Prim.Dist.t
 [@@deriving sexp]
 
 type view =
@@ -35,7 +36,8 @@ type view =
   | Enil of Typ.t
   | Econs of { head : t; tail : t }
   | Elrec of { arg : t; base : t; headv : Var.t; recv : Var.t; step : t }
-  | Esamp of { addr : t; dist : Prim.Dist.t; param : t }
+  | Esamp of { addr : t; dist : t }
+  | Edist of Prim.Dist.t
 [@@deriving variants]
 
 let rec abs fx i z =
@@ -55,7 +57,8 @@ let rec abs fx i z =
   | CONS { head; tail } -> CONS { head = abs fx i z head; tail = abs fx i z tail }
   | LREC { arg; base; headv; recv; step } ->
       LREC { arg = abs fx i z arg; base = abs fx i z base; headv; recv; step = abs fx (i + 2) z step }
-  | SAMP { addr; dist; param } -> SAMP { addr = abs fx i z addr; dist; param = abs fx i z param }
+  | SAMP { addr; dist } -> SAMP { addr = abs fx i z addr; dist = abs fx i z dist }
+  | DIST d -> DIST d
 
 let bind = abs (fun i z -> function FVAR x -> if Var.(x = z) then BVAR i else FVAR x | y -> y)
 let unbind = abs (fun i z -> function BVAR j -> if i = j then FVAR z else BVAR j | y -> y)
@@ -80,7 +83,8 @@ let into =
       let headv = Var.to_user_string headv in
       let recv = Var.to_user_string recv in
       LREC { arg; base; headv; recv; step }
-  | Esamp { addr; dist; param } -> SAMP { addr; dist; param }
+  | Esamp { addr; dist } -> SAMP { addr; dist }
+  | Edist d -> DIST d
 
 let out =
   let out1 (v, e) =
@@ -110,7 +114,8 @@ let out =
       let recv = Var.new_var recv in
       let step = unbind 1 headv @@ unbind 0 recv step in
       Elrec { arg; base; headv; recv; step }
-  | SAMP { addr; dist; param } -> Esamp { addr; dist; param }
+  | SAMP { addr; dist } -> Esamp { addr; dist }
+  | DIST d -> Edist d
 
 let rec frees =
   let frees1 (_, e) = frees e in
@@ -129,7 +134,8 @@ let rec frees =
   | NIL _ -> Var.Set.empty
   | CONS { head; tail } -> Var.Set.union_list [ frees head; frees tail ]
   | LREC { arg; base; step; _ } -> Var.Set.union_list (List.map ~f:frees [ arg; base; step ])
-  | SAMP { addr; param; _ } -> Var.Set.union_list [ frees addr; frees param ]
+  | SAMP { addr; dist; _ } -> Var.Set.union_list [ frees addr; frees dist ]
+  | DIST _ -> Var.Set.empty
 
 let var x = into (evar x)
 let const b = into (econst b)
@@ -144,5 +150,6 @@ let let' ~e1 ~x ~e2 = into (elet ~e1 ~x ~e2)
 let nil t = into (enil t)
 let cons ~head ~tail = into (econs ~head ~tail)
 let lrec ~arg ~base ~headv ~recv ~step = into (elrec ~arg ~base ~headv ~recv ~step)
-let samp ~addr ~dist ~param = into (esamp ~addr ~dist ~param)
+let samp ~addr ~dist = into (esamp ~addr ~dist)
+let dist d = into (edist d)
 let to_string e = Sexp.to_string_hum (sexp_of_t e)

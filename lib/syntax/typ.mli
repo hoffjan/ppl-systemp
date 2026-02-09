@@ -18,6 +18,7 @@ type view =
   | Tsum of t Label.Map.t
   | Tprod of t Label.Map.t
   | Tlist of t
+  | Tdist of t
 
 val into : view -> t
 val out : t -> view
@@ -32,6 +33,7 @@ val arr : argt:t -> rest:t -> t
 val sum : t Label.Map.t -> t
 val prod : t Label.Map.t -> t
 val list : t -> t
+val dist : t -> t
 val bool : t
 val unit : t
 
