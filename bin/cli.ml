@@ -10,13 +10,19 @@ let filename_param = Command.Param.(anon ("filename" %: string))
 
 let simulate =
   Command.basic ~summary:"Sample a trace from a System P program"
-    (Command.Param.map filename_param ~f:(fun filename () ->
-         let exp = parse_file filename in
-         let typ = Statics.type_exp exp in
-         let () = Printf.printf "Type checking successful\n  Typ: %s\n" (Syntax.Typ.to_string typ) in
-         let () = Printf.printf "Starting sampling ... \n" in
-         let res = Dynamics.Eval.simulate exp in
-         Dynamics.Pprint.print_result res))
+    (let%map_open.Command seed = flag "-seed" (optional int) ~doc:"INT random seed" and filename = filename_param in
+     fun () ->
+       let exp = parse_file filename in
+       let typ = Statics.type_exp exp in
+       Printf.printf "Type checking successful\n  Typ: %s\n" (Syntax.Typ.to_string typ);
+       begin match seed with
+       | Some s ->
+           Printf.printf "Simulate with random seed %d ...\n" s;
+           Dynamics.Stat.init s
+       | None -> Printf.printf "Simulate with default random state ...\n"
+       end;
+       let res = Dynamics.Eval.simulate exp in
+       Dynamics.Pprint.print_result res)
 
 let eval =
   Command.basic ~summary:"Evaluate a System P program"
