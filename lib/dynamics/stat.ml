@@ -2,6 +2,8 @@ open Core
 open Syntax
 module O = Owl_stats
 
+let init seed = Owl_stats_prng.init seed
+
 exception Dist_arg_mismatch of Value.t
 
 let wrong_arg v = raise (Dist_arg_mismatch v)
@@ -19,7 +21,7 @@ let sample ~dist ~arg =
   match (dist, arg) with
   | Dbinomial, _ -> begin
       match prod_to_list arg with
-      | [ ("n", Vconst (Cint n)); ("p", Vconst (Cfloat p)) ] ->
+      | [ ("p", Vconst (Cfloat p)); ("n", Vconst (Cint n)) ] ->
           let sample = O.binomial_rvs ~n ~p in
           Vconst (Cint sample)
       | _ -> wrong_arg arg
@@ -31,7 +33,7 @@ let weigh ~dist ~arg v =
   match (dist, arg, v) with
   | Dbinomial, _, Vconst (Cint x) -> begin
       match prod_to_list arg with
-      | [ ("n", Vconst (Cint n)); ("p", Vconst (Cfloat p)) ] -> O.binomial_pdf ~n ~p x
+      | [ ("p", Vconst (Cfloat p)); ("n", Vconst (Cint n)) ] -> O.binomial_pdf ~n ~p x
       | _ -> wrong_arg arg
     end
   | Dbinomial, _, _ -> wrong_arg v

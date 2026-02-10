@@ -88,7 +88,7 @@ let bind x f =
 let ( let* ) = bind
 let return res = { trace = Trace.empty; res; weight = 1.0 }
 
-let generate ~trace:_ ~env ~eval_sample ?seed:_d exp =
+let generate ~trace:_ ~env ~eval_sample exp =
   let rec eval ctx exp =
     let lookup v = match Map.find ctx v with None -> raise (E (Xvar_not_found v)) | Some value -> value in
     let bind_env l =
@@ -185,6 +185,16 @@ let eval exp =
   let eval_sample ~addr:_ ~dist:_ ~arg:_ = failwith "Sample in deterministic execution" in
   let { res; _ } = generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample exp in
   res
+
+let gen ?seed =
+  let () = match seed with None -> () | Some seed -> Stat.init seed in
+  let eval_sample ~addr ~dist ~arg =
+    let v_res = Stat.sample ~dist ~arg in
+    let weight = Stat.weigh ~dist ~arg v_res in
+    let trace = Trace.of_list [ (addr, v_res) ] in
+    { res = v_res; weight; trace }
+  in
+  generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample
 
 (* generate : ~trace:Trace.t ~eval_dist:(Trace.t -> dist -> value) ?seed:int -> result
    where resutl = {trace:Trace.t; weight:float; value:Value.t }

@@ -70,6 +70,50 @@ let rec print_value v =
       print_value arg;
       close_box ()
 
+let print_trace trace =
+  let trace = Trace.to_list trace in
+  let pp_sep _ () =
+    print_string ",";
+    print_space ()
+  in
+  let f _ (addr, value) =
+    open_hbox ();
+    print_string addr;
+    print_space ();
+    print_string "=";
+    print_space ();
+    print_value value;
+    close_box ()
+  in
+  open_box 1;
+  print_string "{";
+  pp_print_list ~pp_sep f std_formatter trace;
+  print_string "}";
+  close_box ()
+
+let print_result arg =
+  let print_field field print_arg =
+    open_hbox ();
+    print_string field;
+    print_space ();
+    print_arg ();
+    close_box ()
+  in
+  let print_sep () = print_space () in
+  let open Value in
+  let { res; trace; weight } = arg in
+  open_vbox 1;
+  print_string "Result";
+  print_sep ();
+  print_field "Value: " (fun () -> print_value res);
+  print_sep ();
+  print_field "Weight:" (fun () -> print_float weight);
+  print_sep ();
+  print_field "Trace: " (fun () -> print_trace trace);
+  print_sep ();
+  print_string "\n";
+  close_box ()
+
 let print_value v =
   let () = print_value v in
   print_string "\n"
