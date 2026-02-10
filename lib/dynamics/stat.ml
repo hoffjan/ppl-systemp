@@ -1,0 +1,37 @@
+open Core
+open Syntax
+module O = Owl_stats
+
+exception Dist_arg_mismatch of Value.t
+
+let wrong_arg v = raise (Dist_arg_mismatch v)
+
+let prod_to_list v =
+  match v with
+  | Value.Vprod lmap ->
+      let f ~key ~data l = (Label.to_string key, data) :: l in
+      Map.fold lmap ~init:[] ~f
+  | _ -> wrong_arg v
+
+let sample ~dist ~arg =
+  let open Prim.Dist in
+  let open Value in
+  match (dist, arg) with
+  | Dbinomial, _ -> begin
+      match prod_to_list arg with
+      | [ ("n", Vconst (Cint n)); ("p", Vconst (Cfloat p)) ] ->
+          let sample = O.binomial_rvs ~n ~p in
+          Vconst (Cint sample)
+      | _ -> wrong_arg arg
+    end
+
+let weigh ~dist ~arg v =
+  let open Prim.Dist in
+  let open Value in
+  match (dist, arg, v) with
+  | Dbinomial, _, Vconst (Cint x) -> begin
+      match prod_to_list arg with
+      | [ ("n", Vconst (Cint n)); ("p", Vconst (Cfloat p)) ] -> O.binomial_pdf ~n ~p x
+      | _ -> wrong_arg arg
+    end
+  | Dbinomial, _, _ -> wrong_arg v

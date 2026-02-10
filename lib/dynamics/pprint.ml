@@ -17,6 +17,10 @@ let print_label l =
   in
   print_string str
 
+let print_dist d =
+  let open Syntax.Prim.Dist in
+  match d with Dbinomial -> print_string "binomial"
+
 let rec print_value v =
   let open Value in
   match v with
@@ -58,6 +62,12 @@ let rec print_value v =
       print_string "[";
       pp_print_list ~pp_sep (fun _ v -> print_value v) std_formatter vals;
       print_string "]";
+      close_box ()
+  | Vdist { dist; arg } ->
+      open_box 1;
+      print_dist dist;
+      print_space ();
+      print_value arg;
       close_box ()
 
 let print_value v =

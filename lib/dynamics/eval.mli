@@ -8,4 +8,6 @@ module Dynamics_error : sig
   val to_string : t -> string
 end
 
+type 'a result = 'a Value.result
+
 val eval : Exp.t -> Value.t

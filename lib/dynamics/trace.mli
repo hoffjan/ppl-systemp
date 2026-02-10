@@ -1,8 +1,10 @@
-type t
+type 'a t
 
 exception Duplicate_key of string
 
-val to_list : t -> (string * Value.t) list
-val of_list : (string * Value.t) list -> t
-val to_map : t -> Value.t Core.String.Map.t
-val of_map : Value.t Core.String.Map.t -> t
+val to_list : 'a t -> (string * 'a) list
+val of_list : (string * 'a) list -> 'a t
+val to_map : 'a t -> 'a Core.String.Map.t
+val of_map : 'a Core.String.Map.t -> 'a t
+val merge : 'a t -> 'a t -> 'a t
+val empty : 'a t
