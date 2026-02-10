@@ -8,14 +8,14 @@ let parse_file file_name =
 
 let filename_param = Command.Param.(anon ("filename" %: string))
 
-let gen =
+let simulate =
   Command.basic ~summary:"Sample a trace from a System P program"
     (Command.Param.map filename_param ~f:(fun filename () ->
          let exp = parse_file filename in
          let typ = Statics.type_exp exp in
          let () = Printf.printf "Type checking successful\n  Typ: %s\n" (Syntax.Typ.to_string typ) in
          let () = Printf.printf "Starting sampling ... \n" in
-         let res = Dynamics.Eval.gen exp in
+         let res = Dynamics.Eval.simulate exp in
          Dynamics.Pprint.print_result res))
 
 let eval =
@@ -36,4 +36,5 @@ let typecheck =
          Printf.printf "Type checking successful\n  Typ: %s\n" (Syntax.Typ.to_string typ)))
 
 let systemp =
-  Command.group ~summary:("System P v" ^ Version.systemp) [ ("gen", gen); ("eval", eval); ("typecheck", typecheck) ]
+  Command.group ~summary:("System P v" ^ Version.systemp)
+    [ ("simulate", simulate); ("eval", eval); ("typecheck", typecheck) ]

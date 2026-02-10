@@ -186,7 +186,7 @@ let eval exp =
   let { res; _ } = generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample exp in
   res
 
-let gen ?seed =
+let simulate ?seed =
   let () = match seed with None -> () | Some seed -> Stat.init seed in
   let eval_sample ~addr ~dist ~arg =
     let v_res = Stat.sample ~dist ~arg in

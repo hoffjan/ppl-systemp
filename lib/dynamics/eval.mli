@@ -11,4 +11,4 @@ end
 type 'a result = 'a Value.result
 
 val eval : Exp.t -> Value.t
-val gen : ?seed:int -> Exp.t -> Value.t result
+val simulate : ?seed:int -> Exp.t -> Value.t result
