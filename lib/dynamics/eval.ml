@@ -83,10 +83,10 @@ let eval_prim (prim : Prim.Op.t) arg_vals =
 
 let bind x f =
   let { res; weight; trace } = f x.res in
-  { res; weight = weight *. x.weight; trace = Trace.merge x.trace trace }
+  { res; weight = weight +. x.weight; trace = Trace.merge x.trace trace }
 
 let ( let* ) = bind
-let return res = { trace = Trace.empty; res; weight = 1.0 }
+let return res = { trace = Trace.empty; res; weight = 0.0 }
 
 let generate ~trace:_ ~env ~eval_sample exp =
   let rec eval ctx exp =

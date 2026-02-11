@@ -37,10 +37,10 @@ let weigh ~dist ~arg v =
   match (dist, arg, v) with
   | Dbinomial, _, Vconst (Cint x) -> begin
       match prod_to_list arg with
-      | [ ("p", Vconst (Cfloat p)); ("n", Vconst (Cint n)) ] -> O.binomial_pdf ~n ~p x
+      | [ ("p", Vconst (Cfloat p)); ("n", Vconst (Cint n)) ] -> O.binomial_logpdf ~n ~p x
       | _ -> wrong_arg arg
     end
   | Dbinomial, _, _ -> wrong_arg v
-  | Dbernoulli, Vconst (Cfloat p), Vconst (Cint x) -> O.binomial_pdf ~n:1 ~p x
+  | Dbernoulli, Vconst (Cfloat p), Vconst (Cint x) -> O.binomial_logpdf ~n:1 ~p x
   | Dbernoulli, Vconst (Cfloat _), _ -> wrong_arg arg
   | Dbernoulli, param, _ -> wrong_arg param
