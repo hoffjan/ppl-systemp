@@ -87,7 +87,7 @@ let dist_type dist =
     let f (s, t) = (Label.of_string s, t) in
     Typ.prod (Label.Map.of_alist_exn (List.map ~f l))
   in
-  match dist with Dbinomial -> (t_prod [ ("p", t_float); ("n", t_int) ], t_int)
+  match dist with Dbinomial -> (t_prod [ ("p", t_float); ("n", t_int) ], t_int) | Dbernoulli -> (t_float, t_int)
 
 let rec syn_t gamma e =
   let lookup x = match Map.find gamma x with Some t -> t | None -> raise (E (Xvar_not_found x)) in

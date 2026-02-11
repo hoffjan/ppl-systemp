@@ -26,6 +26,10 @@ let sample ~dist ~arg =
           Vconst (Cint sample)
       | _ -> wrong_arg arg
     end
+  | Dbernoulli, Vconst (Cfloat p) ->
+      let sample = O.binomial_rvs ~n:1 ~p in
+      Vconst (Cint sample)
+  | Dbernoulli, _ -> wrong_arg arg
 
 let weigh ~dist ~arg v =
   let open Prim.Dist in
@@ -37,3 +41,6 @@ let weigh ~dist ~arg v =
       | _ -> wrong_arg arg
     end
   | Dbinomial, _, _ -> wrong_arg v
+  | Dbernoulli, Vconst (Cfloat p), Vconst (Cint x) -> O.binomial_pdf ~n:1 ~p x
+  | Dbernoulli, Vconst (Cfloat _), _ -> wrong_arg arg
+  | Dbernoulli, param, _ -> wrong_arg param

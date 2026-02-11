@@ -1,4 +1,4 @@
-let a = sample binom {n=1, p=0.5} at "a" in
+let a = sample bern 0.5 at "a" in
 let b =
   case a = 1 {
       True x -> sample binom {n=1, p=0.9} at "b1"

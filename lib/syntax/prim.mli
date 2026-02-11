@@ -8,7 +8,7 @@ module Op : sig
 end
 
 module Dist : sig
-  type t = Dbinomial
+  type t = Dbinomial | Dbernoulli
 
   include Comparable.S with type t := t
   include Sexpable.S with type t := t
