@@ -22,7 +22,7 @@ let simulate =
        | None -> Printf.printf "Simulate with default random state ...\n"
        end;
        let res = Dynamics.Eval.simulate exp in
-       Dynamics.Pprint.print_result res)
+       Dynamics.Pprint.print_result ~weight:false res)
 
 let eval =
   Command.basic ~summary:"Evaluate a System P program"
