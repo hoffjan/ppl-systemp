@@ -9,6 +9,8 @@ let of_list l = match String.Map.of_alist l with `Ok x -> x | `Duplicate_key key
 let of_map x = x
 let to_map x = x
 let empty = String.Map.empty
+let lookup = Map.find
+let map = Map.map
 
 let merge t1 t2 =
   let f ~key = function `Left v | `Right v -> Some v | `Both _ -> raise (Duplicate_key key) in

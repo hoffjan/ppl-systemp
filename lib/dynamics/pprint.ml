@@ -91,8 +91,9 @@ let print_trace trace =
   print_string "}";
   close_box ()
 
-let print_result ?(weight = true) arg =
+let print_result ?(weight = true) ?(trace = true) arg =
   let weight_arg = weight in
+  let trace_arg = trace in
   let print_field field print_arg =
     open_hbox ();
     print_string field;
@@ -109,10 +110,10 @@ let print_result ?(weight = true) arg =
   print_field "Value: " (fun () -> print_value res);
   if weight_arg then (
     print_sep ();
-    print_field "Weight:" (fun () -> print_float weight))
-  else ();
-  print_sep ();
-  print_field "Trace: " (fun () -> print_trace trace);
+    print_field "Weight:" (fun () -> print_float weight));
+  if trace_arg then (
+    print_sep ();
+    print_field "Trace: " (fun () -> print_trace trace));
   print_sep ();
   print_string "\n";
   close_box ()

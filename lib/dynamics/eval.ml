@@ -9,6 +9,7 @@ module Dynamics_error = struct
     | Xprim of Prim.Op.t * Value.t list
     | Xmalformed of Exp.t
     | Xmissing_label of Exp.t * Label.t
+    | Xmissing_address of string
 
   exception E of t
 
@@ -88,7 +89,7 @@ let bind x f =
 let ( let* ) = bind
 let return res = { trace = Trace.empty; res; weight = 0.0 }
 
-let generate ~trace:_ ~env ~eval_sample exp =
+let generate ~trace ~env ~eval_sample exp =
   let rec eval ctx exp =
     let lookup v = match Map.find ctx v with None -> raise (E (Xvar_not_found v)) | Some value -> value in
     let bind_env l =
@@ -162,7 +163,7 @@ let generate ~trace:_ ~env ~eval_sample exp =
         let* v_dist = eval ctx dist in
         match v_dist with
         | Vdist { dist; arg } -> (
-            match v_addr with Vconst (Cstring s) -> eval_sample ~addr:s ~dist ~arg | _ -> malformed addr)
+            match v_addr with Vconst (Cstring s) -> eval_sample ~trace ~addr:s ~dist ~arg | _ -> malformed addr)
         | _ -> malformed dist)
   and eval_list ctx es =
     match es with
@@ -182,19 +183,26 @@ let generate ~trace:_ ~env ~eval_sample exp =
   eval env exp
 
 let eval exp =
-  let eval_sample ~addr:_ ~dist:_ ~arg:_ = failwith "Sample in deterministic execution" in
+  let eval_sample ~trace:_ ~addr:_ ~dist:_ ~arg:_ = failwith "Sample in deterministic execution" in
   let { res; _ } = generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample exp in
   res
 
 let simulate ?seed =
   let () = match seed with None -> () | Some seed -> Stat.init seed in
-  let eval_sample ~addr ~dist ~arg =
+  let eval_sample ~trace:_ ~addr ~dist ~arg =
     let v_res = Stat.sample ~dist ~arg in
-    let weight = Stat.weigh ~dist ~arg v_res in
     let trace = Trace.of_list [ (addr, v_res) ] in
-    { res = v_res; weight; trace }
+    { res = v_res; weight = 0.0; trace }
   in
   generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample
+
+let assess trace =
+  let eval_sample ~trace ~addr ~dist ~arg =
+    let v_res = match Trace.lookup trace addr with None -> raise (E (Xmissing_address addr)) | Some v -> v in
+    let weight = Stat.weigh ~dist ~arg v_res in
+    { res = v_res; weight; trace = Trace.empty }
+  in
+  generate ~trace ~env:Var.Map.empty ~eval_sample
 
 (* generate : ~trace:Trace.t ~eval_dist:(Trace.t -> dist -> value) ?seed:int -> result
    where resutl = {trace:Trace.t; weight:float; value:Value.t }
