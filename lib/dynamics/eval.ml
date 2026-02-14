@@ -10,6 +10,7 @@ module Dynamics_error = struct
     | Xmalformed of Exp.t
     | Xmissing_label of Exp.t * Label.t
     | Xmissing_address of string
+    | Xunused_address of string
 
   exception E of t
 
@@ -73,14 +74,6 @@ let eval_prim (prim : Prim.Op.t) arg_vals =
   | Tostring, [ Vconst (Cint i) ] -> Vconst (Cstring (Int.to_string i))
   | Tostring, [ Vconst (Cfloat i) ] -> Vconst (Cstring (Float.to_string i))
   | Tostring, _ -> err ()
-
-(* generate : ~trace:Trace.t ~eval_dist:(Trace.t -> dist -> value) ?seed:int -> result
-   where resutl = {trace:Trace.t; weight:float; value:Value.t }
-   
-   implement eval : ctx -> exp -> val as local function to generate
-
-   for weigh: check if returned trace has the same size as input
-*)
 
 let bind x f =
   let { res; weight; trace } = f x.res in
@@ -196,18 +189,14 @@ let simulate ?seed =
   in
   generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample
 
-let assess trace =
+let assess trace exp =
   let eval_sample ~trace ~addr ~dist ~arg =
     let v_res = match Trace.lookup trace addr with None -> raise (E (Xmissing_address addr)) | Some v -> v in
     let weight = Stat.weigh ~dist ~arg v_res in
-    { res = v_res; weight; trace = Trace.empty }
+    let trace = Trace.of_list [ (addr, v_res) ] in
+    { res = v_res; weight; trace }
   in
-  generate ~trace ~env:Var.Map.empty ~eval_sample
-
-(* generate : ~trace:Trace.t ~eval_dist:(Trace.t -> dist -> value) ?seed:int -> result
-   where resutl = {trace:Trace.t; weight:float; value:Value.t }
-   
-   implement eval : ctx -> exp -> val as local function to generate
-
-   for weigh: check if returned trace has the same size as input
-*)
+  let res = generate ~trace ~env:Var.Map.empty ~eval_sample exp in
+  if Trace.length trace = Trace.length res.trace then res
+  else
+    match Trace.diff trace res.trace with a :: _ -> raise (E (Xunused_address a)) | _ -> failwith "shouldn't happen"
