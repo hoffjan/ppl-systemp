@@ -1,6 +1,0 @@
-(library
- (name dynamics)
- (modules eval value trace pprint stat)
- (libraries core syntax owl)
- (preprocess
-  (pps ppx_compare ppx_sexp_conv ppx_variants_conv)))

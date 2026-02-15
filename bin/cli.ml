@@ -1,4 +1,5 @@
 open Core
+open Systemp
 
 let parse_file file_name =
   let str = In_channel.read_all file_name in
