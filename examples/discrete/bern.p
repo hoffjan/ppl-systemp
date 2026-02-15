@@ -1,5 +1,10 @@
-
-let a = sample binom {n=1, p=0.5} at "a" in
-let param = {n = a, p=0.9} in
-let addr = "b" in
-sample binom param at addr
+let p = 0.7 in
+let n = 1::2::3::4::5::6::7::8::9::10::Nil[int] in
+let dist = bern p in
+rec n
+  { Nil -> 0
+  | Cons(x,y) ->
+      let label = "a" ^ (toString x) in
+      let r = sample dist at label in
+      y+r
+  }

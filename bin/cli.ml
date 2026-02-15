@@ -19,10 +19,10 @@ let simulate =
        begin match seed with
        | Some s ->
            Printf.printf "Simulate with random seed %d ...\n" s;
-           Dynamics.Stat.init s
+           Dynamics.init s
        | None -> Printf.printf "Simulate with default random state ...\n"
        end;
-       let res = Dynamics.Eval.simulate exp in
+       let res = Dynamics.simulate exp in
        Dynamics.Pprint.print_result ~weight:false res)
 
 let assess =
@@ -34,9 +34,9 @@ let assess =
        let typ = Statics.type_exp exp in
        let () = Printf.printf "Type checking successful\n  Typ: %s\n" (Syntax.Typ.to_string typ) in
        let exp_trace = Parser.trace trace in
-       let trace = Dynamics.Trace.map exp_trace ~f:(fun exp -> Dynamics.Eval.eval exp) in
+       let trace = Dynamics.Trace.map exp_trace ~f:(fun exp -> Dynamics.eval exp) in
        let () = Printf.printf "Computing weight ...\n" in
-       let res = Dynamics.Eval.assess trace exp in
+       let res = Dynamics.assess trace exp in
        Dynamics.Pprint.print_result ~trace:false res)
 
 let eval =
@@ -46,7 +46,7 @@ let eval =
          let typ = Statics.type_exp exp in
          let () = Printf.printf "Type checking successful\n  Typ: %s\n" (Syntax.Typ.to_string typ) in
          let () = Printf.printf "Starting evaluation ... \n" in
-         let value = Dynamics.Eval.eval exp in
+         let value = Dynamics.eval exp in
          Dynamics.Pprint.print_value value))
 
 let typecheck =
