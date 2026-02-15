@@ -81,7 +81,11 @@ let num s =
   in
   parse s
 
-let const s = (lexeme (choice [ string; num ])) s
+let bool b =
+  let* () = if b then symbol "true" else symbol "false" in
+  return (E.bool_intro b)
+
+let const s = (lexeme (choice [ string; num; bool true; bool false ])) s
 
 let dist s =
   let open Syntax.Prim.Dist in
@@ -130,7 +134,8 @@ and proj s =
   in
   parse s
 
-and atom s = (choice [ dist; sample; prim_op; const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
+and atom s =
+  (choice [ cond; dist; sample; prim_op; const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
 
 and case s =
   let case =
@@ -258,6 +263,18 @@ and sample s =
     let* () = symbol "at" in
     let* addr = exp in
     return (E.samp ~addr ~dist)
+  in
+  parse s
+
+and cond s =
+  let parse =
+    let* _ = symbol "if" in
+    let* e = exp in
+    let* _ = symbol "then" in
+    let* e1 = exp in
+    let* _ = symbol "else" in
+    let* e2 = exp in
+    return (E.bool_elim e e1 e2)
   in
   parse s
 

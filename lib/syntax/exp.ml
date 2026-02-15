@@ -153,3 +153,14 @@ let lrec ~arg ~base ~headv ~recv ~step = into (elrec ~arg ~base ~headv ~recv ~st
 let samp ~addr ~dist = into (esamp ~addr ~dist)
 let dist d = into (edist d)
 let to_string e = Sexp.to_string_hum (sexp_of_t e)
+let unit = prod Label.Map.empty
+let tt = Label.of_string "True"
+let ff = Label.of_string "False"
+
+let bool_intro b =
+  let typ = match Typ.out Typ.bool with Tsum tmap -> tmap | _ -> failwith "not possible" in
+  inj ~con:(if b then tt else ff) ~typ ~arg:unit
+
+let bool_elim e e1 e2 =
+  let cases = Label.Map.of_alist_exn [ (tt, (Var.new_var "none", e1)); (ff, (Var.new_var "none", e2)) ] in
+  case ~arg:e ~cases ~typ:None

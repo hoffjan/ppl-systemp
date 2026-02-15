@@ -39,23 +39,6 @@ let out = function
 
 let subst _ _ t2 = t2
 let frees _ = Var.Set.empty
-
-let rec to_string : t -> string =
- fun t ->
-  match out t with
-  | Tbase Bint -> "int"
-  | Tbase Bfloat -> "float"
-  | Tbase Bstring -> "string"
-  | Tarr { argt; rest } -> Printf.sprintf "(%s -> %s)" (to_string argt) (to_string rest)
-  | Tsum ts ->
-      let summand (l, ty) = Printf.sprintf "`%s of %s" (Label.to_string l) (to_string ty) in
-      Printf.sprintf "[%s]" (String.concat ~sep:" | " (List.map (Map.to_alist ts) ~f:summand))
-  | Tprod lmaptyp ->
-      let factor (_, ty) = Printf.sprintf "%s" (to_string ty) in
-      Printf.sprintf "(%s)" (String.concat ~sep:" * " (List.map (Map.to_alist lmaptyp) ~f:factor))
-  | Tlist t -> to_string t ^ " list"
-  | Tdist t -> to_string t ^ " dist"
-
 let base bt = into @@ Tbase bt
 let arr ~argt ~rest = into @@ Tarr { argt; rest }
 let sum ts = into @@ Tsum ts
@@ -68,9 +51,29 @@ let bool =
     (Label.Map.of_alist_exn
        [ (Label.of_string "True", prod Label.Map.empty); (Label.of_string "False", prod Label.Map.empty) ])
 
-let unit = prod Label.Map.empty
-
-include Comparable.Make (struct
+module Comp = Comparable.Make (struct
   type s = t [@@deriving compare, sexp]
   type t = s [@@deriving compare, sexp]
 end)
+
+let rec to_string : t -> string =
+ fun t ->
+  match out t with
+  | Tbase Bint -> "int"
+  | Tbase Bfloat -> "float"
+  | Tbase Bstring -> "string"
+  | Tarr { argt; rest } -> Printf.sprintf "(%s -> %s)" (to_string argt) (to_string rest)
+  | Tsum ts ->
+      if Comp.(t = bool) then "bool"
+      else
+        let summand (l, ty) = Printf.sprintf "`%s of %s" (Label.to_string l) (to_string ty) in
+        Printf.sprintf "[%s]" (String.concat ~sep:" | " (List.map (Map.to_alist ts) ~f:summand))
+  | Tprod lmaptyp ->
+      let factor (label, ty) = Printf.sprintf "%s = %s" (Label.to_string label) (to_string ty) in
+      Printf.sprintf "{%s}" (String.concat ~sep:", " (List.map (Map.to_alist lmaptyp) ~f:factor))
+  | Tlist t -> to_string t ^ " list"
+  | Tdist t -> to_string t ^ " dist"
+
+let unit = prod Label.Map.empty
+
+include Comp

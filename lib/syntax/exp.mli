@@ -44,3 +44,5 @@ val dist : Prim.Dist.t -> t
 
 (* extras *)
 val to_string : t -> string
+val bool_intro : bool -> t
+val bool_elim : t -> t -> t -> t
