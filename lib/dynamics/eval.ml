@@ -74,6 +74,8 @@ let eval_prim (prim : Prim.Op.t) arg_vals =
   | Tostring, [ Vconst (Cint i) ] -> Vconst (Cstring (Int.to_string i))
   | Tostring, [ Vconst (Cfloat i) ] -> Vconst (Cstring (Float.to_string i))
   | Tostring, _ -> err ()
+  | Cons, [ head; Vlist tail ] -> Vlist (head :: tail)
+  | Cons, _ -> err ()
 
 let bind x f =
   let { res; weight; trace } = f x.res in

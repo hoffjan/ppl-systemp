@@ -100,6 +100,10 @@ let infix sym prim =
   let op e1 e2 = E.primapp ~prim ~args:[ e1; e2 ] in
   Infix (symbol sym >> return op, Assoc_left)
 
+let infix_assoc_right sym prim =
+  let op e1 e2 = E.primapp ~prim ~args:[ e1; e2 ] in
+  Infix (symbol sym >> return op, Assoc_right)
+
 let prefix sym prim =
   let op e = E.primapp ~prim ~args:[ e ] in
   Prefix (symbol sym >> return op)
@@ -110,6 +114,7 @@ let operators () =
     [ prefix "-" Neg ];
     [ infix "*" Times; infix "/" Div; infix "%" Mod ];
     [ infix "+" Plus; infix "-" Minus; infix "^" Concat ];
+    [ infix_assoc_right "::" Cons ];
     [ infix "=" Eq; infix "/=" Neq; infix "<" Lt; infix "<=" Lte; infix ">" Gt; infix ">=" Gte ];
   ]
 
@@ -277,5 +282,27 @@ and cond s =
     return (E.bool_elim e e1 e2)
   in
   parse s
+
+(* and list s = *)
+(*   let just_list e1 = *)
+(*     let* () = symbol "," in *)
+(*     let* es = sep_by exp (symbol ",") in *)
+(*     let* () = symbol "]" in *)
+(*     return (E.list (e1 :: es)) *)
+(*   in *)
+(*   let list_compr _e1 = *)
+(*     let* () = symbol "|" in *)
+(*     let* _x = var_ident in *)
+(*     let* () = symbol "<-" in *)
+(*     let* _e = exp in *)
+(*     let* () = symbol "]" in *)
+(*     failwith "not implemented" *)
+(*   in *)
+(*   let parse = *)
+(*     let* () = symbol "[" in *)
+(*     let* e1 = exp in *)
+(*     choice [ just_list e1; list_compr e1 ] *)
+(*   in *)
+(*   parse s *)
 
 let parse s = (spaces >> many typ_dec >> exp) s

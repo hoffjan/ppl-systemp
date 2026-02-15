@@ -31,7 +31,7 @@ let append = fn (l1 : int list) fn (l2 : int list)
   rec l1 { Nil -> l2 | Cons(x,r) -> Cons(x,r) }
 in    
 
-let l = Cons(9,Cons(5,Cons(8,Cons(-1,Nil[int])))) in
+let l = 10+1*88::10::Cons(9,Cons(5,Cons(8,Cons(-1,Nil[int])))) in
 
 { res1 = isort l, res2 = isort (append l (append l l)) }
 		 
