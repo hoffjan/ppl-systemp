@@ -1,0 +1,7 @@
+(include_subdirs qualified)
+
+(library
+ (name systemp)
+ (libraries core owl mparser)
+ (preprocess
+  (pps ppx_compare ppx_sexp_conv ppx_variants_conv)))

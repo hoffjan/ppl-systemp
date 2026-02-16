@@ -19,7 +19,10 @@ let print_label l =
 
 let print_dist d =
   let open Syntax.Prim.Dist in
-  match d with Dbinomial -> print_string "binomial" | Dbernoulli -> print_string "bernoulli"
+  match d with
+  | Dbinomial -> print_string "binomial"
+  | Dbernoulli -> print_string "bernoulli"
+  | Dcategorical -> print_string "categorical"
 
 let rec print_value v =
   let open Value in

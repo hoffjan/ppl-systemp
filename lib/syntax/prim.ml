@@ -12,7 +12,7 @@ end
 
 module Dist = struct
   module T = struct
-    type t = Dbinomial | Dbernoulli [@@deriving compare, sexp]
+    type t = Dbinomial | Dbernoulli | Dcategorical [@@deriving compare, sexp]
   end
 
   include T

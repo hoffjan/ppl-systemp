@@ -91,7 +91,8 @@ let dist s =
   let open Syntax.Prim.Dist in
   let binom = symbol "binomial" >> return (E.dist Dbinomial) in
   let bern = symbol "bernoulli" >> return (E.dist Dbernoulli) in
-  let parse = choice [ binom; bern ] in
+  let categorical = symbol "categorical" >> return (E.dist Dcategorical) in
+  let parse = choice [ categorical; binom; bern ] in
   parse s
 
 (* Binary operations *)
