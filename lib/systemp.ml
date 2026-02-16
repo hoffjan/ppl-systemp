@@ -4,14 +4,14 @@ module Parser = Parser
 module Syntax = Syntax
 module Dynamics = Dynamics
 
-let exp_of_file file_name =
+let model_of_file file_name =
   let str = In_channel.read_all file_name in
   let exp = Parser.exp str in
   exp
 
 let exp_of_str = Parser.exp
 
-let trace_of_string str =
+let model_of_string str =
   let exp_trace = Parser.trace str in
   Dynamics.Trace.map exp_trace ~f:(fun exp -> Dynamics.eval exp)
 
