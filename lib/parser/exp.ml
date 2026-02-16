@@ -89,8 +89,8 @@ let const s = (lexeme (choice [ string; num; bool true; bool false ])) s
 
 let dist s =
   let open Syntax.Prim.Dist in
-  let binom = symbol "binom" >> return (E.dist Dbinomial) in
-  let bern = symbol "bern" >> return (E.dist Dbernoulli) in
+  let binom = symbol "binomial" >> return (E.dist Dbinomial) in
+  let bern = symbol "bernoulli" >> return (E.dist Dbernoulli) in
   let parse = choice [ binom; bern ] in
   parse s
 
