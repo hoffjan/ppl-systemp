@@ -9,13 +9,13 @@ module Dynamics_error = struct
     | Xprim of Prim.Op.t * Value.t list
     | Xmalformed of Exp.t
     | Xmissing_label of Exp.t * Label.t
-    | Xmissing_address of string
-    | Xunused_address of string
 
   exception E of t
 
   let to_string _ = failwith "unimplemented"
 end
+
+exception Malformed_trace
 
 open Dynamics_error
 
@@ -182,23 +182,30 @@ let eval exp =
   let { res; _ } = generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample exp in
   res
 
-let simulate ?seed =
+let simulate ?seed exp =
   let () = match seed with None -> () | Some seed -> Stat.init seed in
   let eval_sample ~trace:_ ~addr ~dist ~arg =
     let v_res = Stat.sample ~dist ~arg in
     let trace = Trace.of_list [ (addr, v_res) ] in
     { res = v_res; weight = 0.0; trace }
   in
-  generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample
+  let result = generate ~trace:Trace.empty ~env:Var.Map.empty ~eval_sample exp in
+  { result with res = Some result.res }
 
 let assess trace exp =
   let eval_sample ~trace ~addr ~dist ~arg =
-    let v_res = match Trace.lookup trace addr with None -> raise (E (Xmissing_address addr)) | Some v -> v in
-    let weight = Stat.weigh ~dist ~arg v_res in
+    let v_res = match Trace.lookup trace addr with None -> raise Malformed_trace | Some v -> v in
     let trace = Trace.of_list [ (addr, v_res) ] in
+    let weight = try Stat.weigh ~dist ~arg v_res with Stat.Dist_arg_mismatch _ -> raise Malformed_trace in
     { res = v_res; weight; trace }
   in
-  let res = generate ~trace ~env:Var.Map.empty ~eval_sample exp in
-  if Trace.length trace = Trace.length res.trace then res
-  else
-    match Trace.diff trace res.trace with a :: _ -> raise (E (Xunused_address a)) | _ -> failwith "shouldn't happen"
+  try
+    begin
+      let result = generate ~trace ~env:Var.Map.empty ~eval_sample exp in
+      if Trace.length trace = Trace.length result.trace then { result with res = Some result.res }
+      else
+        match Trace.diff trace result.trace with
+        | _ :: _ -> { result with res = None; weight = log 0.0 }
+        | _ -> failwith "shouldn't happen"
+    end
+  with Malformed_trace -> { res = None; trace = Trace.empty; weight = log 0.0 }

@@ -110,7 +110,9 @@ let print_result ?(weight = true) ?(trace = true) arg =
   open_vbox 1;
   print_string "Result";
   print_sep ();
-  print_field "Value: " (fun () -> print_value res);
+  (match res with
+  | None -> print_string "Malformed trace"
+  | Some res -> print_field "Value: " (fun () -> print_value res));
   if weight_arg then (
     print_sep ();
     print_field "Weight:" (fun () -> print_float weight));
