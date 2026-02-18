@@ -120,7 +120,7 @@ TYPE ::= 'int'            (integer base type)
 
 ### Top Level
 
-You can run `dune utop` to get access to the model Systemp, which 
+You can run `dune utop` to get access to the module Systemp, which 
 contains the interface for use in a top level CLI.
 
 ```
