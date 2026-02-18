@@ -70,6 +70,12 @@ EXP ::= ID                                       (variable)
         'Cons' '(' EXP ',' EXP ')'               (nonempty list)
 		'rec' EXP "{" "Nil" "->" EXP " |" "Cons" (list recursor)
 	        "(" ID "," "ID" ")" "->" EXP "}"
+	    'true' | 'false' |                       (boolean constants)
+		'if' EXP 'then' EXP 'else' EXP |         (conditional)
+		'sample' EXP 'at' EXP |                  (sample)
+		DIST                                     (built-in distribution)
+
+DIST = bernoulli | binomial | nominal
 
 ID ::= ( a-z ) ( a-z | A-Z )*
 
@@ -78,6 +84,8 @@ CID ::= ( A-Z ) ( a-z | A-Z )*
 CASES = '{' [ CID ID '->' EXP ('|' CID ID '->' EXP)* ] '}'
 
 CONST ::= FLOAT | INT | STRING
+
+OP ::= '^' | '::' | '+' | '*' | '/' | '%' | '=' | '/=' | | '<' | '<=' | '>' | '=>'
 
 SUMTYPE ::= '[' [CID ':' TYPE (',' CID ':' TYPE)*] ']'
 PRDTYPE ::= '{' [ID ':' TYPE (',' ID ':' TYPE)*] '}'
@@ -89,18 +97,54 @@ TYPE ::= 'int'            (integer base type)
          TYPE 'list'      (list type)
          SUMTYPE          (sum type)
          PRDTYPE          (product type)
-
+		 TYPE 'dist'      (distribution type)
 ```
 
 ## Usage
+
+### Executable
 
 ```
   systemp SUBCOMMAND
 
 === subcommands ===
 
-  eval FILENAME              . Evaluate a System P program
-  typecheck FILENAME         . Evaluate a System P program
+  assess                     . Compute the weight of a complete trace of a
+                               System P program
+  eval                       . Evaluate a System P program
+  simulate                   . Sample a trace from a System P program
+  typecheck                  . Evaluate a System P program
   version                    . print version information
   help                       . explain a given subcommand (perhaps recursively)
+```
+
+### Top Level
+
+You can run `dune utop` to get access to the model Systemp, which 
+contains the interface for use in a top level CLI.
+
+```
+utop # #show Systemp;;
+module Systemp :
+  sig
+    module Statics = Systemp__.Statics
+    module Parser = Systemp__.Parser
+    module Syntax = Systemp__.Syntax
+    module Dynamics = Systemp__.Dynamics
+    val model_of_file : string -> Syntax.Exp.t
+    val exp_of_str : string -> Syntax.Exp.t
+    val model_of_string : string -> Systemp.Dynamics.Value.t Dynamics.Trace.t
+    val simulate :
+      ?seed:int ->
+      Syntax.Exp.t -> Dynamics.Value.t option Dynamics.Value.result
+    val assess :
+      Dynamics.Value.t Dynamics.Trace.t ->
+      Syntax.Exp.t -> Dynamics.Value.t option Dynamics.Value.result
+    val eval : Syntax.Exp.t -> Dynamics.Value.t
+    val print_value : Dynamics.Value.t -> unit
+    val print_trace : Dynamics.Value.t Dynamics.Trace.t -> unit
+    val print_result :
+      ?weight:bool ->
+      ?trace:bool -> Dynamics.Value.t option Dynamics.Value.result -> unit
+  end
 ```
