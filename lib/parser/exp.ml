@@ -43,7 +43,7 @@ let with_bound_var str p =
 
 let typ_dec s =
   let parser =
-    let* () = symbol "type" in
+    let* () = keyword "type" in
     let* t_name = typ_ident in
     let* () = symbol "=" in
     let* t = typ in
@@ -152,7 +152,7 @@ and case s =
     return (con, var_exp)
   in
   let parse =
-    let* () = symbol "case" in
+    let* () = keyword "case" in
     let* typ = option (between (symbol "[") (symbol "]") typ) in
     let* arg = exp in
     let* cases = between (symbol "{") (symbol "}") (sep_by case (symbol "|")) in
@@ -196,7 +196,7 @@ and prod s =
 
 and lrec s =
   let parse =
-    let* () = symbol "rec" in
+    let* () = keyword "rec" in
     let* arg = exp in
     let* () = symbol "{" in
     let* () = sym_nil in
@@ -213,7 +213,7 @@ and lrec s =
 
 and let' s =
   let parse =
-    let* () = symbol "let" in
+    let* () = keyword "let" in
     let* x = var_ident in
     let* () = symbol "=" in
     let* e1 = exp in
@@ -251,7 +251,7 @@ and cons s =
 and lam s =
   (*    fn (x : int) x *)
   let parse =
-    let* _ = symbol "fn" in
+    let* _ = keyword "fn" in
     let* _ = symbol "(" in
     let* argv = var_ident in
     let* _ = symbol ":" in
@@ -264,7 +264,7 @@ and lam s =
 
 and sample s =
   let parse =
-    let* () = symbol "sample" in
+    let* () = keyword "sample" in
     let* dist = exp in
     let* () = symbol "at" in
     let* addr = exp in
@@ -274,11 +274,11 @@ and sample s =
 
 and cond s =
   let parse =
-    let* _ = symbol "if" in
+    let* _ = keyword "if" in
     let* e = exp in
-    let* _ = symbol "then" in
+    let* _ = keyword "then" in
     let* e1 = exp in
-    let* _ = symbol "else" in
+    let* _ = keyword "else" in
     let* e2 = exp in
     return (E.bool_elim e e1 e2)
   in

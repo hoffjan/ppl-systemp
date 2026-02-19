@@ -36,10 +36,11 @@ let lexeme p = p >>= fun x -> spaces >> return x
 
 (* Parses a specific string and eats whitespace *)
 let symbol str = lexeme (string str) >> return ()
+let keyword str = string str >> not_followed_by alphanum "expecting keyword" >> spaces >> return ()
+let is_keyword str = List.mem keywords ~equal:String.( = ) str
 
 (* Parses identifiers: starts with a letter, followed by alphanumerics *)
 let ident case =
-  let is_keyword str = List.mem keywords ~equal:String.( = ) str in
   let id = pipe2 case (many alphanum) (fun c cs -> String.of_char_list (c :: cs)) in
   let* str = look_ahead id in
   if is_keyword str then fail ("Expecting identifyer but found keyword: " ^ str) else lexeme id <?> "identifier"
