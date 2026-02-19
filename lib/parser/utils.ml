@@ -36,7 +36,7 @@ let lexeme p = p >>= fun x -> spaces >> return x
 
 (* Parses a specific string and eats whitespace *)
 let symbol str = lexeme (string str) >> return ()
-let keyword str = string str >> not_followed_by alphanum "expecting keyword" >> spaces >> return ()
+let keyword str = attempt (string str >> not_followed_by alphanum "expecting keyword") >> spaces >> return ()
 let is_keyword str = List.mem keywords ~equal:String.( = ) str
 
 (* Parses identifiers: starts with a letter, followed by alphanumerics *)
