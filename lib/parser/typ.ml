@@ -10,7 +10,7 @@ let base s =
 
 let rec typ t_of_str s =
   let parse =
-    let* argt = list t_of_str in
+    let* argt = list_or_dist t_of_str in
     let* arrow = option (symbol "->") in
     match arrow with
     | None -> return argt
@@ -44,8 +44,9 @@ and decs t_of_str l_sym r_sym label s =
 and prod t_of_str s = (decs t_of_str "{" "}" prod_comp >>= fun lmap -> return (Typ.prod lmap)) s
 and sum t_of_str s = (decs t_of_str "[" "]" sum_const >>= fun lmap -> return (Typ.sum lmap)) s
 
-and list t_of_str =
+and list_or_dist t_of_str =
   let* t = atom t_of_str in
-  many_fold_left (fun t () -> Typ.list t) t (symbol "list")
+  let f t d = match d with "list" -> Typ.list t | "dist" -> Typ.dist t | _ -> failwith "shouldn't happen" in
+  many_fold_left f t (choice [ symbol "list" >> return "list"; symbol "dist" >> return "dist" ])
 
 let parse t_of_str s = (spaces >> typ t_of_str) s
