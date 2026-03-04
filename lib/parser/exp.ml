@@ -225,12 +225,17 @@ and let' s =
   parse s
 
 and prim_op s =
-  let parse =
+  let parse_to_string =
     let* () = symbol "toString" in
     let* e = exp in
     return (E.primapp ~prim:Tostring ~args:[ e ])
   in
-  parse s
+  let parse_to_float =
+    let* () = symbol "toFloat" in
+    let* e = exp in
+    return (E.primapp ~prim:Tofloat ~args:[ e ])
+  in
+  (choice [ parse_to_string; parse_to_float ]) s
 
 and nil s =
   let parse =

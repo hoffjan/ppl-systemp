@@ -17,6 +17,7 @@ let keywords =
     "list";
     "dist";
     "toString";
+    "toFloat";
     "true";
     "false";
     "if";

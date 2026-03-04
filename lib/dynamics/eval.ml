@@ -74,6 +74,8 @@ let eval_prim (prim : Prim.Op.t) arg_vals =
   | Tostring, [ Vconst (Cint i) ] -> Vconst (Cstring (Int.to_string i))
   | Tostring, [ Vconst (Cfloat i) ] -> Vconst (Cstring (Float.to_string i))
   | Tostring, _ -> err ()
+  | Tofloat, [ Vconst (Cint i) ] -> Vconst (Cfloat (Float.of_int i))
+  | Tofloat, _ -> err ()
   | Cons, [ head; Vlist tail ] -> Vlist (head :: tail)
   | Cons, _ -> err ()
 

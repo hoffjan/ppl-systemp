@@ -78,6 +78,8 @@ let syn_prim_t prim arg_types =
   | Tostring, [ Tbase Bint ] -> Typ.base Bstring
   | Tostring, [ Tbase Bfloat ] -> Typ.base Bstring
   | Tostring, _ -> err ()
+  | Tofloat, [ Tbase Bint ] -> Typ.base Bfloat
+  | Tofloat, _ -> err ()
   | Cons, [ t1; Tlist t2 ] when Typ.(Typ.into t1 = t2) -> Typ.list t2
   | Cons, _ -> err ()
 
