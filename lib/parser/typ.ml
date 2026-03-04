@@ -49,4 +49,4 @@ and list_or_dist t_of_str =
   let f t d = match d with "list" -> Typ.list t | "dist" -> Typ.dist t | _ -> failwith "shouldn't happen" in
   many_fold_left f t (choice [ symbol "list" >> return "list"; symbol "dist" >> return "dist" ])
 
-let parse t_of_str s = (spaces >> typ t_of_str) s
+let parse t_of_str s = (spaces_or_comment >> typ t_of_str) s

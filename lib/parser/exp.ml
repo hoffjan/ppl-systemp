@@ -306,4 +306,4 @@ and cond s =
 (*   in *)
 (*   parse s *)
 
-let parse s = (spaces >> many typ_dec >> exp) s
+let parse s = (spaces_or_comment >> many typ_dec >> exp) s
