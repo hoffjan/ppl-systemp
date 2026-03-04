@@ -44,6 +44,25 @@ let sample ~dist ~arg =
       let p = list_to_array v in
       let sample = Owl.categorical_rvs p in
       Vconst (Cint sample)
+  | Duniform_int, _ -> begin
+      match prod_to_list arg with
+      | [ ("b", Vconst (Cint b)); ("a", Vconst (Cint a)) ] ->
+          let sample = Owl.uniform_int_rvs ~a ~b in
+          Vconst (Cint sample)
+      | _ -> wrong_arg arg
+    end
+
+(** Computes the log probability of [x] for a uniform distribution over the inclusive integer interval [a, b]. *)
+let uniform_int_logpdf ~a ~b x =
+  if b < a then
+    (* Invalid interval, probability is 0 *)
+    Float.neg_infinity
+  else if a <= x && x <= b then
+    (* x is within the interval *)
+    -.log (Float.of_int (b - a + 1))
+  else
+    (* x is outside the interval, probability is 0 *)
+    Float.neg_infinity
 
 let weigh ~dist ~arg v =
   let open Prim.Dist in
@@ -63,3 +82,9 @@ let weigh ~dist ~arg v =
       let weight = if Int.(0 <= n) && Int.(n < Array.length p) then Array.get p n else 0.0 in
       log weight
   | Dcategorical, _, v -> wrong_arg v
+  | Duniform_int, _, Vconst (Cint x) -> begin
+      match prod_to_list arg with
+      | [ ("b", Vconst (Cint b)); ("a", Vconst (Cint a)) ] -> uniform_int_logpdf ~a ~b x
+      | _ -> wrong_arg arg
+    end
+  | Duniform_int, _, _ -> wrong_arg v

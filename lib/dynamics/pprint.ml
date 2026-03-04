@@ -23,6 +23,7 @@ let print_dist d =
   | Dbinomial -> print_string "binomial"
   | Dbernoulli -> print_string "bernoulli"
   | Dcategorical -> print_string "categorical"
+  | Duniform_int -> print_string "uniform_int"
 
 let rec print_value v =
   let open Value in

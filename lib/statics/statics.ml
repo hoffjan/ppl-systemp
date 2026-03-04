@@ -93,6 +93,7 @@ let dist_type dist =
   | Dbinomial -> (t_prod [ ("p", t_float); ("n", t_int) ], t_int)
   | Dbernoulli -> (t_float, t_int)
   | Dcategorical -> (Typ.list t_float, t_int)
+  | Duniform_int -> (t_prod [ ("a", t_int); ("b", t_int) ], t_int)
 
 let rec syn_t gamma e =
   let lookup x = match Map.find gamma x with Some t -> t | None -> raise (E (Xvar_not_found x)) in

@@ -8,7 +8,7 @@ module Op : sig
 end
 
 module Dist : sig
-  type t = Dbinomial | Dbernoulli | Dcategorical
+  type t = Dbinomial | Dbernoulli | Dcategorical | Duniform_int
 
   include Comparable.S with type t := t
   include Sexpable.S with type t := t

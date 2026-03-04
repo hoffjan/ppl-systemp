@@ -24,8 +24,10 @@ let keywords =
     "else";
     "sample";
     "at";
-    "bern";
-    "binom";
+    "bernoulli";
+    "binomial";
+    "categorical";
+    "uniform_int";
   ]
 
 let ( let* ) = bind

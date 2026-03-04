@@ -92,7 +92,8 @@ let dist s =
   let binom = symbol "binomial" >> return (E.dist Dbinomial) in
   let bern = symbol "bernoulli" >> return (E.dist Dbernoulli) in
   let categorical = symbol "categorical" >> return (E.dist Dcategorical) in
-  let parse = choice [ categorical; binom; bern ] in
+  let uniform_int = symbol "uniform_int" >> return (E.dist Duniform_int) in
+  let parse = choice [ uniform_int; categorical; binom; bern ] in
   parse s
 
 (* Binary operations *)
