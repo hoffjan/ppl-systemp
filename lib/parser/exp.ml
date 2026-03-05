@@ -23,7 +23,7 @@ type ('a, 'b) parse_state = {
   types : (string, T.t, 'a) Base.Map.t;
 }
 
-let typ s = (get_user_state >>= fun { types; _ } -> Typ.parse (Map.find_exn types)) s
+let typ s = (get_user_state >>= fun { types; _ } -> Typ.parse (Map.find types)) s
 
 let var s =
   let parse =
