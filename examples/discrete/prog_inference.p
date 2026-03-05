@@ -29,12 +29,4 @@ let model = fn (observations : {addr : string, val : int} list)
    x + y
 in
 
-let l =  {addr = "a1", val = 1}
-       ::{addr = "a2", val = 2}
-       ::{addr = "a3", val = 3}
-       ::{addr = "a1", val = 4}
-       ::Nil[{addr : string, val : int}]
-in
-
-
-model l
+model

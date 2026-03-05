@@ -1,9 +1,15 @@
 open Core
 open Systemp
 
+let try_or_exit f =
+  try f ()
+  with Parser.Parse_error msg ->
+    let () = print_string ("Parse error:\n" ^ msg) in
+    exit 1
+
 let parse_file file_name =
   let str = In_channel.read_all file_name in
-  let exp = Parser.exp str in
+  let exp = try_or_exit (fun () -> Parser.exp str) in
   let () = Printf.printf "Parsing successful.\n" in
   exp
 
@@ -33,7 +39,7 @@ let assess =
        let exp = parse_file filename in
        let typ = Statics.type_exp exp in
        let () = Printf.printf "Type checking successful\n  Typ: %s\n" (Syntax.Typ.to_string typ) in
-       let exp_trace = Parser.trace trace in
+       let exp_trace = try_or_exit (fun () -> Parser.trace trace) in
        let trace = Dynamics.Trace.map exp_trace ~f:(fun exp -> Dynamics.eval exp) in
        let () = Printf.printf "Computing weight ...\n" in
        let res = Dynamics.assess trace exp in

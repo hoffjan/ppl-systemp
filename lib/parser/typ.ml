@@ -20,7 +20,9 @@ let rec typ t_of_str s =
   in
   parse s
 
-and var t_of_str = typ_ident >>= fun str -> return (t_of_str str)
+and var t_of_str =
+  typ_ident >>= fun str -> match t_of_str str with Some t -> return t | None -> fail ("Type " ^ str ^ " undefined")
+
 and atom t_of_str = choice [ attempt (var t_of_str); base; prod t_of_str; sum t_of_str; parens (typ t_of_str) ]
 
 and decs t_of_str l_sym r_sym label s =
