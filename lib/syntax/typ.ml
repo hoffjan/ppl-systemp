@@ -11,6 +11,7 @@ type t =
   | PROD of t Label.Map.t
   | LIST of t
   | DIST of t
+  | POLYLIST
 [@@deriving sexp, compare]
 
 type view =
@@ -20,6 +21,7 @@ type view =
   | Tprod of t Label.Map.t
   | Tlist of t
   | Tdist of t
+  | Tpolylist
 
 let into = function
   | Tbase b -> BASE b
@@ -28,6 +30,7 @@ let into = function
   | Tprod ts -> PROD ts
   | Tlist t -> LIST t
   | Tdist t -> DIST t
+  | Tpolylist -> POLYLIST
 
 let out = function
   | BASE b -> Tbase b
@@ -36,6 +39,7 @@ let out = function
   | PROD ts -> Tprod ts
   | LIST t -> Tlist t
   | DIST t -> Tdist t
+  | POLYLIST -> Tpolylist
 
 let subst _ _ t2 = t2
 let frees _ = Var.Set.empty
@@ -45,6 +49,7 @@ let sum ts = into @@ Tsum ts
 let prod ts = into @@ Tprod ts
 let list t = into @@ Tlist t
 let dist t = into @@ Tdist t
+let polylist = into @@ Tpolylist
 
 let bool =
   sum
@@ -73,6 +78,7 @@ let rec to_string : t -> string =
       Printf.sprintf "{%s}" (String.concat ~sep:", " (List.map (Map.to_alist lmaptyp) ~f:factor))
   | Tlist t -> to_string t ^ " list"
   | Tdist t -> to_string t ^ " dist"
+  | Tpolylist -> "'a list"
 
 let unit = prod Label.Map.empty
 

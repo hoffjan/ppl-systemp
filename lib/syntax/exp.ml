@@ -15,7 +15,7 @@ type t =
   | PROD of t Label.Map.t
   | PROJ of { comp : Label.t; arg : t }
   | LET of { e1 : t; x : string; e2 : t }
-  | NIL of Typ.t
+  | NIL of Typ.t option
   | CONS of { head : t; tail : t }
   | LREC of { arg : t; base : t; headv : string; recv : string; step : t }
   | SAMP of { addr : t; dist : t }
@@ -33,7 +33,7 @@ type view =
   | Eprod of t Label.Map.t
   | Eproj of { comp : Label.t; arg : t }
   | Elet of { e1 : t; x : Var.t; e2 : t }
-  | Enil of Typ.t
+  | Enil of Typ.t option
   | Econs of { head : t; tail : t }
   | Elrec of { arg : t; base : t; headv : Var.t; recv : Var.t; step : t }
   | Esamp of { addr : t; dist : t }

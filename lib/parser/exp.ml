@@ -238,14 +238,13 @@ and prim_op s =
   (choice [ parse_to_string; parse_to_float ]) s
 
 and nil s =
-  let parse =
-    let* () = sym_nil in
-    let* () = symbol "[" in
+  let type_anno =
+    let* _ = symbol "[" in
     let* t = typ in
-    let* () = symbol "]" in
-    return (E.nil t)
+    let* _ = symbol "]" in
+    return t
   in
-  parse s
+  (sym_nil >> option type_anno >>= fun t -> return (E.nil t)) s
 
 and cons s =
   let parse =
