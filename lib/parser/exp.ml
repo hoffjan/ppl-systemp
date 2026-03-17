@@ -142,7 +142,7 @@ and proj s =
   parse s
 
 and atom s =
-  (choice [ cond; dist; sample; prim_op; const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
+  (choice [ list; cond; dist; sample; prim_op; const; case; prod; lrec; let'; nil; cons; inj; lam; var; parens exp ]) s
 
 and case s =
   let case =
@@ -289,26 +289,34 @@ and cond s =
   in
   parse s
 
-(* and list s = *)
-(*   let just_list e1 = *)
-(*     let* () = symbol "," in *)
-(*     let* es = sep_by exp (symbol ",") in *)
-(*     let* () = symbol "]" in *)
-(*     return (E.list (e1 :: es)) *)
-(*   in *)
-(*   let list_compr _e1 = *)
-(*     let* () = symbol "|" in *)
-(*     let* _x = var_ident in *)
-(*     let* () = symbol "<-" in *)
-(*     let* _e = exp in *)
-(*     let* () = symbol "]" in *)
-(*     failwith "not implemented" *)
-(*   in *)
-(*   let parse = *)
-(*     let* () = symbol "[" in *)
-(*     let* e1 = exp in *)
-(*     choice [ just_list e1; list_compr e1 ] *)
-(*   in *)
-(*   parse s *)
+and list s =
+  let just_list =
+    let* es = sep_by exp (symbol ",") in
+    let* () = symbol "]" in
+    let f x acc = E.cons ~head:x ~tail:acc in
+    return (List.fold_right ~f ~init:(E.nil None) es)
+  in
+  let find_bound_var =
+    let* _ = skip_many_until any_char_or_nl (symbol "|") in
+    let* x = var_ident in
+    return x
+  in
+  let list_compr =
+    let* x = look_ahead find_bound_var in
+    let* headv, head = with_bound_var x exp in
+    let* () = symbol "|" in
+    let* _ = var_ident in
+    let* () = symbol "<-" in
+    let* arg = exp in
+    let* () = symbol "]" in
+    let recv = E.Var.new_var "rec_result" in
+    let step = E.cons ~head ~tail:(E.var recv) in
+    return (E.lrec ~arg ~base:(E.nil None) ~headv ~recv ~step)
+  in
+  let parse =
+    let* () = symbol "[" in
+    choice [ attempt just_list; list_compr ]
+  in
+  parse s
 
 let parse s = (spaces_or_comment >> many typ_dec >> exp) s
