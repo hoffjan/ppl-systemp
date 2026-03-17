@@ -24,6 +24,11 @@ let print_dist d =
   | Dbernoulli -> print_string "bernoulli"
   | Dcategorical -> print_string "categorical"
   | Duniform_int -> print_string "uniform_int"
+  | Dnormal -> print_string "normal"
+  | Duniform -> print_string "uniform"
+  | Dexponential -> print_string "exponential"
+  | Dbeta -> print_string "beta"
+  | Dgamma -> print_string "gamma"
 
 let rec print_value v =
   let open Value in

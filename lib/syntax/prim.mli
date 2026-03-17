@@ -25,7 +25,7 @@ module Op : sig
 end
 
 module Dist : sig
-  type t = Dbinomial | Dbernoulli | Dcategorical | Duniform_int
+  type t = Dbinomial | Dbernoulli | Dcategorical | Duniform_int | Dnormal | Duniform | Dexponential | Dgamma | Dbeta
 
   include Comparable.S with type t := t
   include Sexpable.S with type t := t

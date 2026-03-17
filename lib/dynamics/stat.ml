@@ -51,6 +51,38 @@ let sample ~dist ~arg =
           Vconst (Cint sample)
       | _ -> wrong_arg arg
     end
+  | Dnormal, _ -> begin
+      match prod_to_list arg with
+      | [ ("sigma", Vconst (Cfloat sigma)); ("mu", Vconst (Cfloat mu)) ] ->
+          let sample = Owl.gaussian_rvs ~sigma ~mu in
+          Vconst (Cfloat sample)
+      | _ -> wrong_arg arg
+    end
+  | Duniform, _ -> begin
+      match prod_to_list arg with
+      | [ ("b", Vconst (Cfloat b)); ("a", Vconst (Cfloat a)) ] ->
+          let sample = Owl.uniform_rvs ~a ~b in
+          Vconst (Cfloat sample)
+      | _ -> wrong_arg arg
+    end
+  | Dbeta, _ -> begin
+      match prod_to_list arg with
+      | [ ("b", Vconst (Cfloat b)); ("a", Vconst (Cfloat a)) ] ->
+          let sample = Owl.beta_rvs ~a ~b in
+          Vconst (Cfloat sample)
+      | _ -> wrong_arg arg
+    end
+  | Dgamma, _ -> begin
+      match prod_to_list arg with
+      | [ ("shape", Vconst (Cfloat shape)); ("scale", Vconst (Cfloat scale)) ] ->
+          let sample = Owl.gamma_rvs ~shape ~scale in
+          Vconst (Cfloat sample)
+      | _ -> wrong_arg arg
+    end
+  | Dexponential, Vconst (Cfloat lambda) ->
+      let sample = Owl.exponential_rvs ~lambda in
+      Vconst (Cfloat sample)
+  | Dexponential, _ -> wrong_arg arg
 
 (** Computes the log probability of [x] for a uniform distribution over the inclusive integer interval [a, b]. *)
 let uniform_int_logpdf ~a ~b x =
@@ -88,3 +120,30 @@ let weigh ~dist ~arg v =
       | _ -> wrong_arg arg
     end
   | Duniform_int, _, _ -> wrong_arg v
+  | Dnormal, _, Vconst (Cfloat x) -> begin
+      match prod_to_list arg with
+      | [ ("sigma", Vconst (Cfloat sigma)); ("mu", Vconst (Cfloat mu)) ] -> Owl.gaussian_logpdf ~sigma ~mu x
+      | _ -> wrong_arg arg
+    end
+  | Dnormal, _, _ -> wrong_arg v
+  | Duniform, _, Vconst (Cfloat x) -> begin
+      match prod_to_list arg with
+      | [ ("b", Vconst (Cfloat b)); ("a", Vconst (Cfloat a)) ] -> Owl.uniform_logpdf ~a ~b x
+      | _ -> wrong_arg arg
+    end
+  | Duniform, _, _ -> wrong_arg v
+  | Dbeta, _, Vconst (Cfloat x) -> begin
+      match prod_to_list arg with
+      | [ ("b", Vconst (Cfloat b)); ("a", Vconst (Cfloat a)) ] -> Owl.beta_logpdf ~a ~b x
+      | _ -> wrong_arg arg
+    end
+  | Dbeta, _, _ -> wrong_arg v
+  | Dgamma, _, Vconst (Cfloat x) -> begin
+      match prod_to_list arg with
+      | [ ("shape", Vconst (Cfloat shape)); ("scale", Vconst (Cfloat scale)) ] -> Owl.gamma_logpdf ~shape ~scale x
+      | _ -> wrong_arg arg
+    end
+  | Dgamma, _, _ -> wrong_arg v
+  | Dexponential, Vconst (Cfloat lambda), Vconst (Cfloat x) -> Owl.exponential_logpdf ~lambda x
+  | Dexponential, Vconst (Cfloat _), _ -> wrong_arg v
+  | Dexponential, _, _ -> wrong_arg arg

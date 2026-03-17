@@ -127,6 +127,11 @@ let dist_type dist =
   | Dbernoulli -> (t_float, t_int)
   | Dcategorical -> (Typ.list t_float, t_int)
   | Duniform_int -> (t_prod [ ("a", t_int); ("b", t_int) ], t_int)
+  | Dnormal -> (t_prod [ ("mu", t_float); ("sigma", t_float) ], t_float)
+  | Duniform -> (t_prod [ ("a", t_float); ("b", t_float) ], t_float)
+  | Dexponential -> (t_float, t_float)
+  | Dgamma -> (t_prod [ ("shape", t_float); ("scale", t_float) ], t_float)
+  | Dbeta -> (t_prod [ ("a", t_float); ("b", t_float) ], t_float)
 
 let rec syn_t gamma e =
   let lookup x = match Map.find gamma x with Some t -> t | None -> raise (E (Xvar_not_found x)) in
