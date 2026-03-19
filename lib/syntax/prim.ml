@@ -20,6 +20,7 @@ module Op = struct
       | Tostring
       | Cons
       | Tofloat
+      | Sin
     [@@deriving compare, sexp]
   end
 

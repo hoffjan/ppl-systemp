@@ -19,6 +19,7 @@ module Op : sig
     | Tostring
     | Cons
     | Tofloat
+    | Sin
 
   include Comparable.S with type t := t
   include Sexpable.S with type t := t

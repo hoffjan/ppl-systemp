@@ -18,6 +18,7 @@ let keywords =
     "dist";
     "toString";
     "toFloat";
+    "sin";
     "true";
     "false";
     "if";
@@ -29,6 +30,11 @@ let keywords =
     "binomial";
     "categorical";
     "uniform_int";
+    "normal";
+    "uniform";
+    "exponential";
+    "beta";
+    "gamma";
   ]
 
 let ( let* ) = bind

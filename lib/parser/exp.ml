@@ -93,7 +93,12 @@ let dist s =
   let bern = symbol "bernoulli" >> return (E.dist Dbernoulli) in
   let categorical = symbol "categorical" >> return (E.dist Dcategorical) in
   let uniform_int = symbol "uniform_int" >> return (E.dist Duniform_int) in
-  let parse = choice [ uniform_int; categorical; binom; bern ] in
+  let normal = symbol "normal" >> return (E.dist Dnormal) in
+  let uniform = symbol "uniform" >> return (E.dist Duniform) in
+  let exponential = symbol "exponential" >> return (E.dist Dexponential) in
+  let beta = symbol "beta" >> return (E.dist Dbeta) in
+  let gamma = symbol "gamma" >> return (E.dist Dgamma) in
+  let parse = choice [ normal; uniform; exponential; beta; gamma; uniform_int; categorical; binom; bern ] in
   parse s
 
 (* Binary operations *)
@@ -225,17 +230,23 @@ and let' s =
   parse s
 
 and prim_op s =
+  let symbol_white str = attempt (symbol str >> not_followed_by (choice [ alphanum; any_of "_" ]) "not an op") in
   let parse_to_string =
-    let* () = symbol "toString" in
+    let* () = symbol_white "toString" in
     let* e = exp in
     return (E.primapp ~prim:Tostring ~args:[ e ])
   in
   let parse_to_float =
-    let* () = symbol "toFloat" in
+    let* () = symbol_white "toFloat" in
     let* e = exp in
     return (E.primapp ~prim:Tofloat ~args:[ e ])
   in
-  (choice [ parse_to_string; parse_to_float ]) s
+  let parse_sin =
+    let* () = symbol_white "sin" in
+    let* e = exp in
+    return (E.primapp ~prim:Sin ~args:[ e ])
+  in
+  (choice [ parse_sin; parse_to_string; parse_to_float ]) s
 
 and nil s =
   let type_anno =

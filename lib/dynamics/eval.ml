@@ -78,6 +78,8 @@ let eval_prim (prim : Prim.Op.t) arg_vals =
   | Tofloat, _ -> err ()
   | Cons, [ head; Vlist tail ] -> Vlist (head :: tail)
   | Cons, _ -> err ()
+  | Sin, [ Vconst (Cfloat f) ] -> Vconst (Cfloat (Float.sin f))
+  | Sin, _ -> err ()
 
 let bind x f =
   let { res; weight; trace } = f x.res in

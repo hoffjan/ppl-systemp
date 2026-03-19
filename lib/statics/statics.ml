@@ -113,6 +113,8 @@ let syn_prim_t prim arg_types =
   | Tofloat, _ -> err ()
   | Cons, [ t1; t2 ] -> unify (Typ.list (Typ.into t1)) (Typ.into t2)
   | Cons, _ -> err ()
+  | Sin, [ Tbase Bfloat ] -> Typ.base Bfloat
+  | Sin, _ -> err ()
 
 let dist_type dist =
   let open Prim.Dist in
