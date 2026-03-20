@@ -4,6 +4,8 @@ module Parser = Parser
 module Syntax = Syntax
 module Dynamics = Dynamics
 
+type trace = Dynamics.Inference.trace
+
 let exp_of_str str =
   let exp = Parser.exp str in
   let _ = Statics.type_exp exp in
@@ -35,5 +37,8 @@ let simulate ?seed ?arg model =
 
 let assess ?arg trace exp = with_arg arg (Dynamics.assess trace) exp
 let eval ?arg exp = with_arg arg Dynamics.eval exp
+let rejection_sampling_fixed_runtime = Dynamics.Inference.rejection_sampling_fixed_runtime
+let rejection_sampling_random_runtime = Dynamics.Inference.rejection_sampling_random_runtime
+let importance_resampling = Dynamics.Inference.importance_resampling
 
 include Dynamics.Pprint

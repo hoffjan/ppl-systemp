@@ -213,3 +213,19 @@ let assess trace exp =
         | _ -> failwith "shouldn't happen"
     end
   with Malformed_trace -> { res = None; trace = Trace.empty; weight = log 0.0 }
+
+let generate ?seed ~trace exp =
+  let () = match seed with None -> () | Some seed -> Stat.init seed in
+  let eval_sample ~trace ~addr ~dist ~arg =
+    match Trace.lookup trace addr with
+    | None ->
+        let v_res = Stat.sample ~dist ~arg in
+        let trace = Trace.of_list [ (addr, v_res) ] in
+        { res = v_res; weight = 0.0; trace }
+    | Some v_res ->
+        let trace = Trace.of_list [ (addr, v_res) ] in
+        let weight = try Stat.weigh ~dist ~arg v_res with Stat.Dist_arg_mismatch _ -> raise Malformed_trace in
+        { res = v_res; weight; trace }
+  in
+  let result = generate ~trace ~env:Var.Map.empty ~eval_sample exp in
+  { result with res = Some result.res }
